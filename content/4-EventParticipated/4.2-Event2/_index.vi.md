@@ -12,7 +12,7 @@ pre: " <b> 4.2. </b> "
 
 - Tiếp cận xu hướng công nghệ mới nhất từ AWS với trọng tâm là **Agentic AI**, dữ liệu phân tích và hiện đại hóa ứng dụng.
 - Lắng nghe chia sẻ thực tế từ các nhà lãnh đạo công nghệ, chính phủ và các doanh nghiệp lớn hàng đầu tại Việt Nam về chuyển đổi số.
-- Tiếp cận và trải nghiệm các giải pháp AI, demo công nghệ và kết nối cùng cộng đồng Cloud/AI tại không gian văn phòng AWS Vietnam (Bitexco, TP.HCM)[cite: 4, 5].
+- Tiếp cận và trải nghiệm các giải pháp AI, demo công nghệ và kết nối cùng cộng đồng Cloud/AI tại không gian văn phòng AWS Vietnam (Bitexco, TP.HCM).
 - Định hình tư duy ứng dụng hệ thống tác tử AI (Agentic Systems) vào quy trình phát triển phần mềm và tối ưu hạ tầng đám mây.
 
 ### Danh Sách Diễn Giả
@@ -44,7 +44,7 @@ Chủ đề xuyên suốt: *"What if we asked ourselves, 'Why not make every ide
 
 - **8-Bit Agents Activation**: Trải nghiệm thực hành xây dựng, cấu hình và triển khai các AI Agent giải quyết thử thách tự động trong vài phút.
 - **Startup Zone**: Trưng bày và trình diễn các giải pháp thực tế giải quyết bài toán thuộc lĩnh vực Fintech, AI và Thương mại từ các startup hàng đầu.
-- **Developer Community Zone**: Giao lưu trực tiếp cùng các Kỹ sư giải pháp (Solution Architects) của AWS và cộng đồng AWS User Group Vietnam[cite: 4].
+- **Developer Community Zone**: Giao lưu trực tiếp cùng các Kỹ sư giải pháp (Solution Architects) của AWS và cộng đồng AWS User Group Vietnam.
 
 ### Những Gì Học Được
 
@@ -73,7 +73,7 @@ Chủ đề xuyên suốt: *"What if we asked ourselves, 'Why not make every ide
 
 ### Trải nghiệm trong event
 
-Tham gia sự kiện **AWS Cloud and AI Day Hanoi - Watch Party Ho Chi Minh City** tại văn phòng AWS Vietnam (Tòa nhà Bitexco Financial Tower, Tầng 26 & 36) vào ngày 29/09/2026 là một trải nghiệm học tập và mở rộng mạng lưới nghề nghiệp đặc biệt giá trị[cite: 4, 5]:
+Tham gia sự kiện **AWS Cloud and AI Day Hanoi - Watch Party Ho Chi Minh City** tại văn phòng AWS Vietnam (Tòa nhà Bitexco Financial Tower, Tầng 26 & 36) vào ngày 29/09/2026 là một trải nghiệm học tập và mở rộng mạng lưới nghề nghiệp đặc biệt giá trị:
 
 #### Học hỏi từ các chuyên gia hàng đầu
 - Được trực tiếp theo dõi các bài trình bày từ Giám đốc Công nghệ Amazon - **Dr. Werner Vogels** và các lãnh đạo công nghệ, mang lại góc nhìn vĩ mô về kiến trúc phân tán quy mô toàn cầu.
@@ -84,14 +84,14 @@ Tham gia sự kiện **AWS Cloud and AI Day Hanoi - Watch Party Ho Chi Minh City
 - Quan sát cách các startup công nghệ trong nước hiện thực hóa sản phẩm thương mại bằng các dịch vụ điện toán đám mây của AWS.
 
 #### Kết nối và giao lưu cộng đồng
-- Sự kiện được tổ chức chuyên nghiệp từ khâu đón tiếp, check-in thẻ đeo tại tầng 26 đến việc kết nối cầu truyền hình trực tiếp chất lượng cao[cite: 5].
-- Gặp gỡ và trao đổi trực tiếp với các Solution Architects của AWS và anh em kỹ sư trong cộng đồng công nghệ tại TP.HCM[cite: 4], giúp tôi hiểu rõ hơn về các tiêu chuẩn tuyển dụng và kỹ năng thực tế cần trau dồi.
+- Sự kiện được tổ chức chuyên nghiệp từ khâu đón tiếp, check-in thẻ đeo tại tầng 26 đến việc kết nối cầu truyền hình trực tiếp chất lượng cao.
+- Gặp gỡ và trao đổi trực tiếp với các Solution Architects của AWS và anh em kỹ sư trong cộng đồng công nghệ tại TP.HCM, giúp tôi hiểu rõ hơn về các tiêu chuẩn tuyển dụng và kỹ năng thực tế cần trau dồi.
 
 #### Bài học rút ra
 - Sự bùng nổ của Agentic AI đòi hỏi kỹ sư phải nâng cao năng lực thiết kế API và hệ thống dữ liệu để AI có thể tương tác hiệu quả, thay vì chỉ dừng lại ở câu lệnh prompt đơn lẻ.
 - Tinh thần "Why not make every idea possible?" thúc đẩy sự chủ động ứng dụng hạ tầng đám mây để hiện thực hóa các ý tưởng phần mềm nhanh chóng và an toàn.
 
 #### Một số hình ảnh khi tham gia sự kiện
-- ![Check-in ở hội trường theo dõi tại Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/event02.jpg)
+- ![Check-in ở hội trường theo dõi tại Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event02.jpg)
 
 > Tổng thể, sự kiện không chỉ cập nhật những bước tiến công nghệ đột phá của AWS mà còn truyền cảm hứng mạnh mẽ, giúp tôi định hình rõ ràng hơn lộ trình phát triển chuyên môn trong lĩnh vực Cloud Computing và Trí tuệ Nhân tạo.

@@ -26,4 +26,4 @@ Tính năng này đặc biệt hữu ích cho các nhóm phát triển ứng d�
 ![AWS Lambda Web Functions Architecture](/fcj-workshop-template/images/3-Blog/Blog02.png)
 
 **Link**
-- 
+https://www.facebook.com/share/p/1G9t8ND5dw/

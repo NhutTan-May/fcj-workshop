@@ -1,108 +1,221 @@
 ---
-title: "Bản đề xuất"
-date: 2024-01-01
+title: "Proposal"
+date: 2026-11-06
 weight: 2
 chapter: false
 pre: " <b> 2. </b> "
 ---
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
+
+# ImageGuard – Kiểm duyệt và gắn nhãn ảnh tự động bằng AI trên AWS Serverless
+
+{{% notice info %}}
+**Trạng thái:** Bản đề xuất v2.0.
 {{% /notice %}}
 
-Tại phần này, bạn cần tóm tắt các nội dung trong workshop mà bạn **dự tính** sẽ làm.
+## 1. Tổng quan
 
-# IoT Weather Platform for Lab Research  
-## Giải pháp AWS Serverless hợp nhất cho giám sát thời tiết thời gian thực  
+**ImageGuard** là một ứng dụng web serverless giúp các trang rao vặt, diễn đàn hoặc câu lạc bộ sinh viên **tự động kiểm duyệt và phân loại ảnh do người dùng tải lên**. Khi người dùng đăng ảnh, hệ thống dùng dịch vụ AI thị giác máy tính **Amazon Rekognition** để:
 
-### 1. Tóm tắt điều hành  
-IoT Weather Platform được thiết kế dành cho nhóm *ITea Lab* tại TP. Hồ Chí Minh nhằm nâng cao khả năng thu thập và phân tích dữ liệu thời tiết. Nền tảng hỗ trợ tối đa 5 trạm thời tiết, có khả năng mở rộng lên 10–15 trạm, sử dụng thiết bị biên Raspberry Pi kết hợp cảm biến ESP32 để truyền dữ liệu qua MQTT. Nền tảng tận dụng các dịch vụ AWS Serverless để cung cấp giám sát thời gian thực, phân tích dự đoán và tiết kiệm chi phí, với quyền truy cập giới hạn cho 5 thành viên phòng lab thông qua Amazon Cognito.  
+1. **Kiểm duyệt (moderation):** phát hiện nội dung không phù hợp (bạo lực, nhạy cảm, vũ khí, chất cấm…). Ảnh vi phạm bị đánh dấu `REJECTED` và quản trị viên nhận email cảnh báo.
+2. **Gắn nhãn (labeling):** với ảnh hợp lệ, tự động sinh nhãn mô tả nội dung (ví dụ *Laptop*, *Bicycle*, *Book*) để người dùng **tìm kiếm ảnh theo nhãn**.
 
-### 2. Tuyên bố vấn đề  
-*Vấn đề hiện tại*  
-Các trạm thời tiết hiện tại yêu cầu thu thập dữ liệu thủ công, khó quản lý khi có nhiều trạm. Không có hệ thống tập trung cho dữ liệu hoặc phân tích thời gian thực, và các nền tảng bên thứ ba thường tốn kém và quá phức tạp.  
+Kết quả được lưu vào **Amazon DynamoDB** và hiển thị trên giao diện web chỉ sau vài giây. Toàn bộ hệ thống chạy theo kiến trúc **hướng sự kiện (event-driven)** và **serverless**: không có máy chủ nào phải quản lý, chỉ trả tiền theo lượt sử dụng.
 
-*Giải pháp*  
-Nền tảng sử dụng AWS IoT Core để tiếp nhận dữ liệu MQTT, AWS Lambda và API Gateway để xử lý, Amazon S3 để lưu trữ (bao gồm data lake), và AWS Glue Crawlers cùng các tác vụ ETL để trích xuất, chuyển đổi, tải dữ liệu từ S3 data lake sang một S3 bucket khác để phân tích. AWS Amplify với Next.js cung cấp giao diện web, và Amazon Cognito đảm bảo quyền truy cập an toàn. Tương tự như Thingsboard và CoreIoT, người dùng có thể đăng ký thiết bị mới và quản lý kết nối, nhưng nền tảng này hoạt động ở quy mô nhỏ hơn và phục vụ mục đích sử dụng nội bộ. Các tính năng chính bao gồm bảng điều khiển thời gian thực, phân tích xu hướng và chi phí vận hành thấp.  
+## 2. Vấn đề cần giải quyết
 
-*Lợi ích và hoàn vốn đầu tư (ROI)*  
-Giải pháp tạo nền tảng cơ bản để các thành viên phòng lab phát triển một nền tảng IoT lớn hơn, đồng thời cung cấp nguồn dữ liệu cho những người nghiên cứu AI phục vụ huấn luyện mô hình hoặc phân tích. Nền tảng giảm bớt báo cáo thủ công cho từng trạm thông qua hệ thống tập trung, đơn giản hóa quản lý và bảo trì, đồng thời cải thiện độ tin cậy dữ liệu. Chi phí hàng tháng ước tính 0,66 USD (theo AWS Pricing Calculator), tổng cộng 7,92 USD cho 12 tháng. Tất cả thiết bị IoT đã được trang bị từ hệ thống trạm thời tiết hiện tại, không phát sinh chi phí phát triển thêm. Thời gian hoàn vốn 6–12 tháng nhờ tiết kiệm đáng kể thời gian thao tác thủ công.  
+- Các nền tảng cho phép người dùng đăng ảnh (rao vặt, diễn đàn, nhóm cộng đồng) nhận rất nhiều ảnh mỗi ngày. **Duyệt tay** từng ảnh tốn nhân lực, chậm, và người duyệt phải tiếp xúc trực tiếp với nội dung độc hại.
+- Nếu không kiểm duyệt, ảnh vi phạm có thể xuất hiện công khai, gây ảnh hưởng tới người dùng và uy tín nền tảng.
+- Ảnh do người dùng tải lên thường **không có mô tả hay thẻ (tag)**, nên rất khó tìm lại.
 
-### 3. Kiến trúc giải pháp  
-Nền tảng áp dụng kiến trúc AWS Serverless để quản lý dữ liệu từ 5 trạm dựa trên Raspberry Pi, có thể mở rộng lên 15 trạm. Dữ liệu được tiếp nhận qua AWS IoT Core, lưu trữ trong S3 data lake và xử lý bởi AWS Glue Crawlers và ETL jobs để chuyển đổi và tải vào một S3 bucket khác cho mục đích phân tích. Lambda và API Gateway xử lý bổ sung, trong khi Amplify với Next.js cung cấp bảng điều khiển được bảo mật bởi Cognito.  
+**Giải pháp:** tự động hóa cả hai việc bằng AI ngay khi ảnh được tải lên. Ảnh vi phạm bị chặn trước khi hiển thị; ảnh hợp lệ được gắn nhãn để tra cứu.
 
-![IoT Weather Station Architecture](/images/2-Proposal/edge_architecture.jpeg)
+## 3. Mục tiêu & Phạm vi
 
-![IoT Weather Platform Architecture](/images/2-Proposal/platform_architecture.jpeg)
+### 3.1. Mục tiêu
 
-*Dịch vụ AWS sử dụng*  
-- *AWS IoT Core*: Tiếp nhận dữ liệu MQTT từ 5 trạm, mở rộng lên 15.  
-- *AWS Lambda*: Xử lý dữ liệu và kích hoạt Glue jobs (2 hàm).  
-- *Amazon API Gateway*: Giao tiếp với ứng dụng web.  
-- *Amazon S3*: Lưu trữ dữ liệu thô (data lake) và dữ liệu đã xử lý (2 bucket).  
-- *AWS Glue*: Crawlers lập chỉ mục dữ liệu, ETL jobs chuyển đổi và tải dữ liệu.  
-- *AWS Amplify*: Lưu trữ giao diện web Next.js.  
-- *Amazon Cognito*: Quản lý quyền truy cập cho người dùng phòng lab.  
+1. Xây dựng pipeline tự động **Upload ảnh → AI kiểm duyệt → AI gắn nhãn → Lưu trữ → Hiển thị/Tìm kiếm** chạy hoàn toàn trên AWS.
+2. Áp dụng **AWS Well-Architected Framework**, đặc biệt là trụ cột **Security** (IAM Least Privilege, không public tài nguyên, không hard-code credentials).
+3. Giám sát đầy đủ bằng **Amazon CloudWatch** (Logs, Metrics, Alarms) và cảnh báo qua email bằng **Amazon SNS**.
+4. Giữ chi phí vận hành ở mức **khoảng 8–9 USD/tháng** với kịch bản tải thực tế (mục 6).
+5. Viết tài liệu **step-by-step song ngữ** để người khác có thể tự triển khai lại.
 
-*Thiết kế thành phần*  
-- *Thiết bị biên*: Raspberry Pi thu thập và lọc dữ liệu cảm biến, gửi tới IoT Core.  
-- *Tiếp nhận dữ liệu*: AWS IoT Core nhận tin nhắn MQTT từ thiết bị biên.  
-- *Lưu trữ dữ liệu*: Dữ liệu thô lưu trong S3 data lake; dữ liệu đã xử lý lưu ở một S3 bucket khác.  
-- *Xử lý dữ liệu*: AWS Glue Crawlers lập chỉ mục dữ liệu; ETL jobs chuyển đổi để phân tích.  
-- *Giao diện web*: AWS Amplify lưu trữ ứng dụng Next.js cho bảng điều khiển và phân tích thời gian thực.  
-- *Quản lý người dùng*: Amazon Cognito giới hạn 5 tài khoản hoạt động.  
+### 3.2. Tiêu chí hoàn thành (Success criteria)
 
-### 4. Triển khai kỹ thuật  
-*Các giai đoạn triển khai*  
-Dự án gồm 2 phần — thiết lập trạm thời tiết biên và xây dựng nền tảng thời tiết — mỗi phần trải qua 4 giai đoạn:  
-1. *Nghiên cứu và vẽ kiến trúc*: Nghiên cứu Raspberry Pi với cảm biến ESP32 và thiết kế kiến trúc AWS Serverless (1 tháng trước kỳ thực tập).  
-2. *Tính toán chi phí và kiểm tra tính khả thi*: Sử dụng AWS Pricing Calculator để ước tính và điều chỉnh (Tháng 1).  
-3. *Điều chỉnh kiến trúc để tối ưu chi phí/giải pháp*: Tinh chỉnh (ví dụ tối ưu Lambda với Next.js) để đảm bảo hiệu quả (Tháng 2).  
-4. *Phát triển, kiểm thử, triển khai*: Lập trình Raspberry Pi, AWS services với CDK/SDK và ứng dụng Next.js, sau đó kiểm thử và đưa vào vận hành (Tháng 2–3).  
+| Tiêu chí | Mục tiêu đo lường |
+|---|---|
+| Thời gian xử lý 1 ảnh (từ lúc upload đến khi có kết quả) | ≤ 10 giây |
+| Ảnh vi phạm bị chặn đúng trên bộ ảnh thử nghiệm | ≥ 90% |
+| Ảnh hợp lệ bị chặn nhầm (false positive) trên bộ ảnh thử nghiệm | ≤ 10% |
+| Người dùng chưa đăng nhập gọi API | Bị từ chối (HTTP 401) |
+| Người dùng A xem ảnh/kết quả của người dùng B | Không thể |
+| Phát hiện ảnh vi phạm | Gửi email cảnh báo cho quản trị viên |
+| Bucket S3 bị truy cập trực tiếp từ Internet | Bị chặn (Block Public Access) |
 
-*Yêu cầu kỹ thuật*  
-- *Trạm thời tiết biên*: Cảm biến (nhiệt độ, độ ẩm, lượng mưa, tốc độ gió), vi điều khiển ESP32, Raspberry Pi làm thiết bị biên. Raspberry Pi chạy Raspbian, sử dụng Docker để lọc dữ liệu và gửi 1 MB/ngày/trạm qua MQTT qua Wi-Fi.  
-- *Nền tảng thời tiết*: Kiến thức thực tế về AWS Amplify (lưu trữ Next.js), Lambda (giảm thiểu do Next.js xử lý), AWS Glue (ETL), S3 (2 bucket), IoT Core (gateway và rules), và Cognito (5 người dùng). Sử dụng AWS CDK/SDK để lập trình (ví dụ IoT Core rules tới S3). Next.js giúp giảm tải Lambda cho ứng dụng web fullstack.  
+### 3.3. Phạm vi
 
-### 5. Lộ trình & Mốc triển khai  
-- *Trước thực tập (Tháng 0)*: 1 tháng lên kế hoạch và đánh giá trạm cũ.  
-- *Thực tập (Tháng 1–3)*:  
-    - Tháng 1: Học AWS và nâng cấp phần cứng.  
-    - Tháng 2: Thiết kế và điều chỉnh kiến trúc.  
-    - Tháng 3: Triển khai, kiểm thử, đưa vào sử dụng.  
-- *Sau triển khai*: Nghiên cứu thêm trong vòng 1 năm.  
+| Trong phạm vi (In scope) | Ngoài phạm vi (Out of scope) |
+|---|---|
+| Ảnh JPG/PNG, ≤ 5 MB | Video, GIF động |
+| Kiểm duyệt nội dung + gắn nhãn tự động | **Nhận diện khuôn mặt** (dữ liệu sinh trắc học, nhạy cảm về quyền riêng tư) |
+| Tìm kiếm ảnh theo nhãn trong ảnh của chính người dùng | Tìm kiếm toàn văn trên toàn hệ thống |
+| Đăng ký/đăng nhập bằng Amazon Cognito | Giao diện quản trị riêng, khiếu nại kết quả kiểm duyệt |
+| 1 Region: **us-east-1** | Multi-Region, Disaster Recovery |
 
-### 6. Ước tính ngân sách  
-Có thể xem chi phí trên [AWS Pricing Calculator](https://calculator.aws/#/estimate?id=621f38b12a1ef026842ba2ddfe46ff936ed4ab01)  
-Hoặc tải [tệp ước tính ngân sách](../attachments/budget_estimation.pdf).  
+## 4. Kiến trúc giải pháp
 
-*Chi phí hạ tầng*  
-- AWS Lambda: 0,00 USD/tháng (1.000 request, 512 MB lưu trữ).  
-- S3 Standard: 0,15 USD/tháng (6 GB, 2.100 request, 1 GB quét).  
-- Truyền dữ liệu: 0,02 USD/tháng (1 GB vào, 1 GB ra).  
-- AWS Amplify: 0,35 USD/tháng (256 MB, request 500 ms).  
-- Amazon API Gateway: 0,01 USD/tháng (2.000 request).  
-- AWS Glue ETL Jobs: 0,02 USD/tháng (2 DPU).  
-- AWS Glue Crawlers: 0,07 USD/tháng (1 crawler).  
-- MQTT (IoT Core): 0,08 USD/tháng (5 thiết bị, 45.000 tin nhắn).  
+![Sơ đồ kiến trúc ImageGuard](/fcj-workshop-template/images/2-proposal/imageguard-architecture.drawio.png)
 
-*Tổng*: 0,7 USD/tháng, 8,40 USD/12 tháng  
-- *Phần cứng*: 265 USD một lần (Raspberry Pi 5 và cảm biến).  
+*Hình 1. Sơ đồ kiến trúc ImageGuard (nhóm tự vẽ bằng draw.io với bộ AWS Architecture Icons). Số trên mũi tên tương ứng với bảng ở mục 4.2. Màu mũi tên: xanh dương – luồng upload; cam – luồng xử lý AI; xanh lá – luồng xem kết quả; xám nét đứt – giám sát; đỏ nét đứt – IAM.*
 
-### 7. Đánh giá rủi ro  
-*Ma trận rủi ro*  
-- Mất mạng: Ảnh hưởng trung bình, xác suất trung bình.  
-- Hỏng cảm biến: Ảnh hưởng cao, xác suất thấp.  
-- Vượt ngân sách: Ảnh hưởng trung bình, xác suất thấp.  
+### 4.1. Các dịch vụ AWS sử dụng và lý do lựa chọn
 
-*Chiến lược giảm thiểu*  
-- Mạng: Lưu trữ cục bộ trên Raspberry Pi với Docker.  
-- Cảm biến: Kiểm tra định kỳ, dự phòng linh kiện.  
-- Chi phí: Cảnh báo ngân sách AWS, tối ưu dịch vụ.  
+| Dịch vụ | Vai trò trong hệ thống | Lý do lựa chọn |
+|---|---|---|
+| **Amazon S3** | (1) Lưu ảnh người dùng (bucket private); (2) lưu web tĩnh | Lưu trữ bền vững 99.999999999%, rẻ, phát sinh **S3 Event** để kích hoạt xử lý |
+| **Amazon CloudFront** | Phân phối web tĩnh qua HTTPS, truy cập S3 qua **Origin Access Control (OAC)** | Bucket web không cần public; có HTTPS miễn phí; nằm trong Always Free (1 TB/tháng) |
+| **Amazon Cognito** (User Pool) | Đăng ký, đăng nhập, cấp **JWT token** | Dịch vụ quản lý danh tính có sẵn, miễn phí tới 10.000 MAU, ứng dụng không tự lưu mật khẩu |
+| **Amazon API Gateway** (HTTP API) | REST endpoint cho web; xác thực bằng **JWT Authorizer** gắn Cognito | Rẻ hơn REST API (~1 USD/1 triệu request), tích hợp sẵn Cognito |
+| **AWS Lambda** (Python 3.12) | 3 hàm: `presign-upload`, `process-image`, `get-images` | Serverless, trả theo lượt chạy, tự mở rộng (scale) |
+| **Amazon Rekognition** | `DetectModerationLabels` (kiểm duyệt) và `DetectLabels` (gắn nhãn) | Dịch vụ AI có sẵn mô hình, không cần tự huấn luyện; đọc ảnh trực tiếp từ S3; dùng được trên Free plan |
+| **Amazon DynamoDB** (On-demand) | Lưu kết quả kiểm duyệt và nhãn theo từng người dùng | NoSQL serverless, trả theo request, độ trễ thấp, 25 GB miễn phí |
+| **Amazon SQS** | **Dead-Letter Queue (DLQ)** chứa sự kiện xử lý thất bại | Không mất dữ liệu khi lỗi, có thể xử lý lại |
+| **Amazon CloudWatch** | Logs, Metrics (mặc định + custom), Alarms, Dashboard | Giám sát tập trung, bắt buộc theo yêu cầu workshop |
+| **Amazon SNS** | Gửi email khi có ảnh vi phạm và khi Alarm kích hoạt | Đơn giản, 1.000 email/tháng miễn phí |
+| **AWS IAM** | Mỗi Lambda 1 IAM Role riêng theo Least Privilege | Nền tảng bảo mật của toàn hệ thống |
 
-*Kế hoạch dự phòng*  
-- Quay lại thu thập thủ công nếu AWS gặp sự cố.  
-- Sử dụng CloudFormation để khôi phục cấu hình liên quan đến chi phí.  
+**Lý do chọn Region us-east-1:** giá thường thấp nhất trong các Region và có đầy đủ dịch vụ. Độ trễ từ Việt Nam (~200 ms) không ảnh hưởng nhiều vì web tĩnh đi qua CloudFront (có edge location tại Hà Nội và TP.HCM), còn khâu chậm nhất là bước AI xử lý ảnh. Nếu triển khai thật cho người dùng Việt Nam, nhóm sẽ cân nhắc chuyển sang Singapore (ap-southeast-1) để giảm độ trễ và đáp ứng quy định về dữ liệu cá nhân; tên Region và tài nguyên đều đặt trong biến môi trường nên không phải sửa code.
 
-### 8. Kết quả kỳ vọng  
-*Cải tiến kỹ thuật*: Dữ liệu và phân tích thời gian thực thay thế quy trình thủ công. Có thể mở rộng tới 10–15 trạm.  
-*Giá trị dài hạn*: Nền tảng dữ liệu 1 năm cho nghiên cứu AI, có thể tái sử dụng cho các dự án tương lai.
+### 4.2. Luồng dữ liệu (Data flow)
+
+Số thứ tự trong bảng trùng với số trên các mũi tên ở Hình 1.
+
+| # | Từ → Đến | Mô tả |
+|---|---|---|
+| 1 | User → CloudFront → S3 `imageguard-web` | Người dùng mở web qua HTTPS. CloudFront đọc web tĩnh từ bucket private qua **Origin Access Control (OAC)** |
+| 2 | User ↔ Cognito | Đăng nhập bằng Managed login (Authorization code + PKCE), nhận **JWT token** |
+| 3 | User → API Gateway | Web gọi `POST /upload-url` kèm token; **JWT Authorizer** kiểm tra token trước khi cho đi tiếp |
+| 3a | API Gateway → Lambda `presign-upload` | API Gateway gọi Lambda tạo link upload |
+| 3b | `presign-upload` → DynamoDB | Tạo bản ghi `PENDING` rồi trả về **Presigned URL** (link upload tạm thời, hết hạn sau 5 phút) cho `uploads/{userId}/{imageId}.jpg` |
+| 4 | User → S3 `imageguard-images` | Trình duyệt upload ảnh **thẳng lên S3** bằng Presigned URL (ảnh không đi qua API Gateway/Lambda) |
+| 5 | S3 → Lambda `process-image` | Sự kiện **ObjectCreated** (chỉ prefix `uploads/`) gọi bất đồng bộ Lambda xử lý |
+| 6 | `process-image` → Rekognition | Gọi `DetectModerationLabels`; nếu ảnh hợp lệ mới gọi tiếp `DetectLabels` (tối đa 10 nhãn, độ tin cậy ≥ 80%) |
+| 6a | Rekognition → S3 `imageguard-images` | Rekognition đọc ảnh trực tiếp từ S3 (Lambda không phải tải ảnh về) |
+| 7 | `process-image` → DynamoDB | Cập nhật bản ghi thành `APPROVED` (kèm nhãn) hoặc `REJECTED` (kèm lý do, khi có nhãn bị cấm với độ tin cậy ≥ 60%) |
+| 8 | `process-image` → SNS → Admin | Chỉ khi ảnh bị `REJECTED` **và** bước 7 đã ghi thành công: gửi email cảnh báo cho quản trị viên |
+| 9 | `process-image` → SQS DLQ | Nếu Lambda vẫn lỗi sau 2 lần thử lại, sự kiện được đưa vào **Dead-Letter Queue** để xử lý lại |
+| 10 | User → API Gateway | Web gọi `GET /images?label=...` kèm token (dùng chung đường mũi tên với bước 3) |
+| 10a | API Gateway → Lambda `get-images` | API Gateway gọi Lambda đọc kết quả |
+| 10b | `get-images` → DynamoDB | Truy vấn **chỉ theo `userId` lấy từ claim `sub` của token**, lọc theo nhãn nếu có; ảnh được hiển thị qua Presigned URL GET ngắn hạn, không public |
+| 11 | 3 Lambda → CloudWatch | Ghi log và metric (Embedded Metric Format) |
+| 12 | CloudWatch → SNS | Alarm (lỗi Lambda, DLQ có message, API 5xx…) gửi email qua SNS |
+| — | IAM → 3 Lambda | Mỗi Lambda có một **IAM execution role** riêng theo Least Privilege (mục 4.3) |
+
+### 4.3. Thiết kế bảo mật (Security pillar)
+
+| Nguyên tắc | Cách áp dụng trong ImageGuard |
+|---|---|
+| **Least Privilege** | Mỗi Lambda có Role riêng. `process-image` chỉ được `s3:GetObject` trên `uploads/*`, `rekognition:DetectModerationLabels` + `rekognition:DetectLabels`, `dynamodb:UpdateItem` **đúng 1 bảng**, `sns:Publish` **đúng 1 topic**. `presign-upload` chỉ được `s3:PutObject` trên `uploads/*` và `dynamodb:PutItem`. `get-images` chỉ được `dynamodb:Query` và `s3:GetObject` |
+| **Giới hạn của Rekognition** | Các API phân tích ảnh của Rekognition **không hỗ trợ giới hạn theo tài nguyên (resource-level permission)**, nên bắt buộc dùng `"Resource": "*"`. Nhóm bù lại bằng cách chỉ cho phép **đúng 2 action** cần dùng, không dùng `rekognition:*` |
+| **Không public tài nguyên** | Cả 2 bucket bật **Block Public Access**. Bucket web chỉ cho CloudFront đọc qua OAC. Bucket ảnh chỉ nhận/trả ảnh qua Presigned URL ngắn hạn |
+| **Xác thực & cô lập dữ liệu** | Mọi API đều yêu cầu JWT từ Cognito. `userId` luôn lấy từ claim `sub` trong token, **không** lấy từ dữ liệu client gửi lên → người dùng không xem được dữ liệu của người khác |
+| **Không hard-code credentials** | Lambda dùng IAM Role (credential tạm thời do AWS tự cấp). Tên bucket/bảng/topic đưa vào **Environment variables**. Repository GitHub không chứa access key; có `.gitignore` |
+| **Mã hóa** | S3 và DynamoDB mã hóa khi lưu (SSE mặc định); mọi kết nối dùng HTTPS/TLS |
+| **Bảo vệ đầu vào** | Presigned URL giới hạn `Content-Type` ảnh; Lambda kiểm tra kích thước ≤ 5 MB và định dạng trước khi gọi AI |
+| **Quyền riêng tư** | Không dùng tính năng nhận diện khuôn mặt; không lưu dữ liệu sinh trắc học |
+
+> **Vì sao không đặt Lambda trong VPC/Private Subnet?** Hệ thống không có cơ sở dữ liệu hay máy chủ nào cần nằm trong mạng riêng. Lambda gọi S3, DynamoDB, Rekognition, SNS qua HTTPS và được xác thực bằng IAM. Nếu đưa Lambda vào VPC thì phải trả thêm phí NAT Gateway hoặc Interface VPC Endpoint (khoảng vài chục USD/tháng) mà không tăng thêm bảo mật đáng kể cho kiến trúc này. Nhóm ghi nhận đây là hướng mở rộng nếu có yêu cầu tuân thủ.
+
+### 4.4. Đối chiếu với AWS Well-Architected Framework
+
+| Trụ cột | Áp dụng |
+|---|---|
+| Operational Excellence | CloudWatch Logs (lưu 14 ngày), Dashboard, Alarms; tài liệu triển khai lại được |
+| Security | Như mục 4.3 |
+| Reliability | Kiến trúc event-driven; Lambda tự retry 2 lần; DLQ giữ sự kiện lỗi; trạng thái `PENDING/APPROVED/REJECTED/FAILED` rõ ràng |
+| Performance Efficiency | Upload thẳng lên S3 bằng Presigned URL; Rekognition đọc ảnh trực tiếp từ S3 (Lambda không phải tải ảnh về); DynamoDB truy vấn theo khóa |
+| Cost Optimization | 100% serverless trả theo lượt dùng; **chỉ gọi `DetectLabels` khi ảnh đã qua kiểm duyệt**; S3 Lifecycle; Logs retention 14 ngày; AWS Budgets |
+| Sustainability | Không có tài nguyên chạy không tải (idle); chỉ tốn tài nguyên khi có ảnh cần xử lý |
+
+### 4.5. Lý do chọn Amazon Rekognition
+
+Phương án ban đầu dùng **Amazon Bedrock** để xử lý hóa đơn. Khi thử nghiệm, quota Bedrock trên tài khoản của nhóm bằng 0 và yêu cầu tăng quota không được chấp thuận. Nhóm chuyển sang **Amazon Rekognition** (dịch vụ AI có sẵn mô hình, dùng được trên tài khoản hiện tại, đã thử thành công trên Console) và giữ nguyên phần lớn kiến trúc serverless. Chi tiết sự cố được ghi lại ở mục Troubleshooting của workshop.
+
+## 5. Kế hoạch & Timeline
+
+Thời gian thực tập: 14/09/2026 – 04/12/2026. Hạn nộp Workshop dự kiến: **19/11/2026** (15 ngày trước ngày cần mộc).
+
+### 5.1. Phân công vai trò
+
+| Thành viên | Vai trò chính |
+|---|---|
+| Thành viên A | Trưởng nhóm, tích hợp hệ thống, IAM & bảo mật |
+| Thành viên B | Lambda `process-image`, tích hợp Rekognition, bộ ảnh thử nghiệm và đánh giá độ chính xác |
+| Thành viên C | Cognito, API Gateway, Lambda `presign-upload` và `get-images` |
+| Thành viên D | Giao diện web tĩnh, S3 + CloudFront (OAC) |
+| Thành viên E | CloudWatch, SNS, DLQ, dự toán chi phí, hướng dẫn Clean-up |
+
+*Mỗi thành viên phải hiểu toàn bộ kiến trúc và tự giải thích được tất cả các phần, không chỉ phần mình phụ trách.*
+
+### 5.2. Timeline theo tuần
+
+| Tuần thực tập | Thời gian | Công việc | Đầu ra |
+|---|---|---|---|
+| Week 7 | 26/10 – 01/11 | Chốt đề tài, viết Proposal v1.0; thử Bedrock, phát hiện quota bằng 0 | Proposal v1.0, ghi nhận sự cố |
+| Week 8 | 02/11 – 08/11 | Xin tăng quota (bị từ chối); đổi sang Rekognition, viết Proposal v2.0; tạo S3, DynamoDB, IAM Role; viết Lambda `process-image` + S3 Event | Proposal v2.0, pipeline xử lý ảnh chạy được |
+| Week 9 | 09/11 – 15/11 | Cognito, API Gateway, 2 Lambda API; web tĩnh + CloudFront; CloudWatch metrics/alarms/dashboard, SNS, DLQ; kiểm thử; AWS Pricing Calculator; quay video demo | Demo end-to-end, video, bảng chi phí |
+| Week 10 | 16/11 – 19/11 | Viết mục 5-Workshop song ngữ (step-by-step, testing, clean-up), chụp screenshot, hoàn thiện sơ đồ kiến trúc, rà soát chéo | **Nộp workshop 19/11** |
+| Week 10–12 | 20/11 – 04/12 | Sửa theo góp ý mentor, hoàn thiện blog và worklog, dọn tài nguyên | Báo cáo hoàn chỉnh |
+
+## 6. Dự toán chi phí (Cost Estimation)
+
+**Kịch bản tải:** một diễn đàn/trang rao vặt nhỏ nhận khoảng **3.000 ảnh/tháng** (~100 ảnh/ngày), ảnh trung bình 1 MB, khoảng 3% ảnh vi phạm, khoảng 30.000 lượt xem/tìm kiếm mỗi tháng. Region **us-east-1**, giá on-demand, **chưa trừ Free Tier/credit**.
+
+| Dịch vụ | Giả định | Chi phí ước tính (USD/tháng) |
+|---|---|---|
+| Amazon Rekognition | 3.000 lượt `DetectModerationLabels` + ~2.910 lượt `DetectLabels` × 0,001 USD/ảnh | 5,91 |
+| AWS Lambda | 3 function arm64, 36.000 lượt chạy × 500 ms × 256 MB | 0,07 (nằm trong Free Tier) |
+| Amazon API Gateway (HTTP API) | 33.000 request | 0,03 |
+| Amazon DynamoDB (On-demand) | ~6.000 WRU + 30.000 RRU, < 1 GB | 0,01 |
+| Amazon S3 | 3 GB (Lifecycle 30 ngày), 3.000 PUT, 30.000 GET | 0,10 |
+| Amazon CloudWatch | 5 custom metric (EMF) 1,50 + 7 alarm 0,70 + 0,1 GB log 0,05; 1 dashboard | 2,25 (nằm trong Free Tier: 10 metric, 10 alarm, 3 dashboard) |
+| Amazon CloudFront | ~2 GB truyền tải, 40.000 request | 0,00 (Always Free) |
+| Amazon Cognito | < 10.000 MAU | 0,00 |
+| Amazon SNS, Amazon SQS | Khoảng 100 email/tin nhắn | 0,00 |
+| **Tổng** | | **≈ 8,37 USD/tháng (≈ 100 USD/năm)** |
+
+Trong giai đoạn phát triển và demo (dự kiến < 300 ảnh), chi phí Rekognition chỉ khoảng 0,60 USD; toàn bộ nằm trong credit của tài khoản.
+
+*Link AWS Pricing Calculator:* [https://calculator.aws/#/estimate?id=5fa9c30d042e143fc2fd1f9387af56c6709e22f9](https://calculator.aws/#/estimate?id=5fa9c30d042e143fc2fd1f9387af56c6709e22f9)
+
+> **Cập nhật sau khi triển khai (20/11/2026):** bản dự toán đầu là 6,40 USD/tháng. Khi triển khai thật, nhóm bổ sung 7 CloudWatch Alarm và 5 custom metric (EMF) để giám sát, nên phần CloudWatch tăng từ 0,27 lên 2,25 USD. Với Free Tier của tài khoản, phần này gần như bằng 0. Data transfer out khi người dùng xem ảnh (~3 GB/tháng) nằm trong 100 GB miễn phí mỗi tháng.
+
+### Chiến lược tối ưu chi phí
+
+- Kiến trúc **100% serverless**: không có EC2, NAT Gateway hay tài nguyên chạy 24/7.
+- **Kiểm duyệt trước, gắn nhãn sau:** ảnh vi phạm không gọi `DetectLabels`, tiết kiệm một lượt gọi API cho mỗi ảnh bị chặn.
+- Rekognition **đọc ảnh trực tiếp từ S3** nên Lambda chạy ngắn (~2 giây) với bộ nhớ nhỏ (256 MB).
+- **S3 Lifecycle Policy** xóa ảnh sau 30 ngày (có thể đổi sang S3 Glacier nếu cần giữ lâu).
+- **CloudWatch Logs retention 14 ngày**, không để mặc định "Never expire".
+- **HTTP API** thay vì REST API (rẻ hơn khoảng 70%).
+- **AWS Budgets** cảnh báo khi chi phí vượt 10 USD; thực hiện **Clean-up** ngay sau khi chấm.
+- Khi lưu lượng lớn hơn 1 triệu ảnh/tháng, giá Rekognition tự giảm theo bậc (tiered pricing).
+
+## 7. Rủi ro & Phương án giảm thiểu
+
+| Rủi ro | Ảnh hưởng | Phương án giảm thiểu |
+|---|---|---|
+| Rekognition chặn nhầm ảnh hợp lệ hoặc bỏ sót ảnh vi phạm | Trải nghiệm người dùng kém hoặc lọt nội dung xấu | Ngưỡng tin cậy và danh mục bị cấm đặt trong biến môi trường để tinh chỉnh; đo tỉ lệ đúng/sai trên bộ ảnh thử nghiệm |
+| Quota/hạn mức dịch vụ của tài khoản mới (đã xảy ra với Bedrock) | Không gọi được AI | Đã kiểm tra Rekognition chạy được trên tài khoản; retry có backoff khi bị throttling |
+| Vòng lặp kích hoạt S3 → Lambda → S3 (recursive trigger) | Tốn chi phí | Chỉ trigger trên prefix `uploads/`; Lambda không ghi ngược vào S3 |
+| Lộ access key lên GitHub | Mất an toàn tài khoản | Chỉ dùng IAM Role cho Lambda; `.gitignore`; kiểm tra lại trước mỗi lần commit |
+| Ảnh thử nghiệm vi phạm bản quyền hoặc quá phản cảm | Vấn đề pháp lý, đạo đức | Dùng ảnh nhóm tự chụp hoặc ảnh giấy phép miễn phí; thử kiểm duyệt bằng danh mục nhẹ (rượu bia, thuốc lá, vũ khí đồ chơi) |
+| Phát sinh chi phí ngoài dự kiến | Tốn credit | AWS Budgets; checklist Clean-up |
+| Thiếu thời gian (còn khoảng 2 tuần) | Không kịp nộp | Phạm vi tối giản (MVP) trước, tính năng phụ làm sau; mỗi tuần có đầu ra rõ ràng |
+| Thành viên chưa vững AWS | Chậm tiến độ, không trả lời được khi mentor hỏi | Học song song với làm; review chéo; mỗi người tự giải thích lại toàn bộ kiến trúc |
+
+## 8. Kết quả kỳ vọng
+
+- Một ứng dụng web chạy thật: đăng nhập → upload ảnh → ảnh vi phạm bị chặn kèm email cảnh báo, ảnh hợp lệ được gắn nhãn và tìm kiếm được.
+- Hệ thống giám sát gồm CloudWatch Dashboard, Alarms và email cảnh báo.
+- Tài liệu workshop song ngữ, có thể triển khai lại từ đầu, kèm phần Testing, Troubleshooting và Clean-up.
+- Nhóm nắm vững các kiến thức thực tế: kiến trúc event-driven serverless, IAM Least Privilege, dịch vụ AI của AWS, giám sát và tối ưu chi phí, cũng như cách xử lý khi một dịch vụ bị giới hạn quota.

@@ -1,33 +1,22 @@
 ---
 title: "Workshop"
-date: 2024-01-01
+date: 2026-09-14
 weight: 5
 chapter: false
 pre: " <b> 5. </b> "
 ---
 
-{{% notice warning %}}
-⚠️ **Lưu ý:** Các thông tin dưới đây chỉ nhằm mục đích tham khảo, vui lòng **không sao chép nguyên văn** cho bài báo cáo của bạn kể cả warning này.
-{{% /notice %}}
+# ImageGuard – Hệ thống kiểm duyệt và gắn nhãn ảnh tự động trên AWS Serverless
 
+Workshop này hướng dẫn bạn xây dựng hoàn chỉnh ứng dụng **ImageGuard** trên kiến trúc **AWS Serverless**: người dùng đăng nhập qua giao diện web, tải ảnh lên; hệ thống sử dụng **Amazon Rekognition** để tự động kiểm duyệt nội dung (bạo lực, nội dung nhạy cảm, chất cấm, biểu tượng thù ghét…), gắn nhãn mô tả cho ảnh hợp lệ phục vụ tìm kiếm, đồng thời chặn ảnh vi phạm và gửi email cảnh báo đến quản trị viên.
 
-# Đảm bảo truy cập Hybrid an toàn đến S3 bằng cách sử dụng VPC endpoint
+Toàn bộ kiến trúc vận hành theo mô hình **hướng sự kiện (event-driven)** tại Region **us-east-1**, không cần quản lý máy chủ và có chi phí ước tính khoảng **8,37 USD/tháng** cho kịch bản 3.000 ảnh.
 
-#### Tổng quan
+| Thông tin | Chi tiết |
+|---|---|
+| **Thời gian thực hiện** | 3 – 4 giờ |
+| **Cấp độ** | 200 – Intermediate |
+| **Dịch vụ AWS chính** | Amazon S3, AWS Lambda, Amazon Rekognition, Amazon DynamoDB, Amazon API Gateway, Amazon Cognito, Amazon CloudFront, Amazon SNS, Amazon SQS, Amazon CloudWatch, AWS IAM |
+| **Mã nguồn tham khảo** | [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop-template/tree/main/static/code/imageguard) |
 
-**AWS PrivateLink** cung cấp kết nối riêng tư đến các dịch vụ aws từ VPCs hoặc trung tâm dữ liệu (on-premise) mà không làm lộ lưu lượng truy cập ra ngoài public internet.
-
-Trong bài lab này, chúng ta sẽ học cách tạo, cấu hình, và kiểm tra VPC endpoints để cho phép workload của bạn tiếp cận các dịch vụ AWS mà không cần đi qua Internet công cộng.
-
-Chúng ta sẽ tạo hai loại endpoints để truy cập đến Amazon S3: gateway vpc endpoint và interface vpc endpoint. Hai loại vpc endpoints này mang đến nhiều lợi ích tùy thuộc vào việc bạn truy cập đến S3 từ môi trường cloud hay từ trung tâm dữ liệu (on-premise).
-+ **Gateway** - Tạo gateway endpoint để gửi lưu lượng đến Amazon S3 hoặc DynamoDB using private IP addresses. Bạn điều hướng lưu lượng từ VPC của bạn đến gateway endpoint bằng các bảng định tuyến (route tables)
-+ **Interface** - Tạo interface endpoint để gửi lưu lượng đến các dịch vụ điểm cuối (endpoints) sử dụng Network Load Balancer để phân phối lưu lượng. Lưu lượng dành cho dịch vụ điểm cuối được resolved bằng DNS.
-
-#### Nội dung
-
-1. [Tổng quan về workshop](5.1-Workshop-overview/)
-2. [Chuẩn bị](5.2-Prerequiste/)
-3. [Truy cập đến S3 từ VPC](5.3-S3-vpc/)
-4. [Truy cập đến S3 từ TTDL On-premises](5.4-S3-onprem/)
-5. [VPC Endpoint Policies (làm thêm)](5.5-Policy/)
-6. [Dọn dẹp tài nguyên](5.6-Cleanup/)
+{{% children /%}}
