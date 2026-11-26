@@ -21,7 +21,7 @@ Bảng dự toán được lập bằng **AWS Pricing Calculator**: [xem chi ti�
 | CloudFront, Cognito, SNS, SQS | Nằm trong hạn mức miễn phí | 0,00 |
 | **Tổng cộng** | | **8,37 USD/tháng** (≈ 100 USD/năm) |
 
-![AWS Pricing Calculator](/fcj-workshop-template/images/5-workshop/29-1-pricing-calculator-summary.jpg)
+![AWS Pricing Calculator](/fcj-workshop/images/5-workshop/29-1-pricing-calculator-summary.jpg)
 
 **Chi phí thực tế khi chạy workshop:** với dưới 300 ảnh thử nghiệm, chi phí Rekognition chỉ khoảng **0,30 – 0,60 USD**, toàn bộ các dịch vụ còn lại đều nằm gọn trong Free Tier.
 

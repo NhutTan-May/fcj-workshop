@@ -87,6 +87,6 @@ Tham gia sự kiện **Buildrathon Kickoff: Code the Future with CMC Global** t�
 - Việc chủ động đặt câu hỏi và kết nối với cộng đồng, mentor ngay từ sớm giúp mở rộng góc nhìn và tạo đà thuận lợi cho suốt kỳ thực tập.
 
 #### Một số hình ảnh khi tham gia sự kiện
-- ![Hình ảnh chụp lưu niệm khi tham gia sự kiện Buildrathon Kickoff tại Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event01.jpg)
+- ![Hình ảnh chụp lưu niệm khi tham gia sự kiện Buildrathon Kickoff tại Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event01.jpg)
 
 > Tổng thể, sự kiện không chỉ mang đến kiến thức nền tảng và trải nghiệm thực hành trực tiếp về Generative AI & AI Agents trên AWS, mà còn giúp tôi kết nối những người bạn đồng hành chất lượng và tiếp thêm động lực cho chặng đường phát triển chuyên môn phía trước.

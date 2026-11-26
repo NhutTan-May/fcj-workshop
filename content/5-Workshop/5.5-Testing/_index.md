@@ -17,7 +17,7 @@ pre: " <b> 5.5. </b> "
 | **Untracked upload** | Put an object directly to S3 without a `PENDING` record | No DynamoDB item created and no alert email triggered |
 | **DLQ recovery path** | Misconfigure `TABLE_NAME` and invoke asynchronously | After 2 retries fail, SQS DLQ receives a `RetriesExhausted` payload (`approximateInvokeCount: 3`) |
 
-![Gallery: APPROVED and REJECTED images](/fcj-workshop-template/images/5-workshop/26-3-web-gallery.png)
+![Gallery: APPROVED and REJECTED images](/fcj-workshop/images/5-workshop/26-3-web-gallery.png)
 
 {{% notice note %}}
 **False-positive observation:** the wooden toy gun triggered *Violence/Weapons* at ~97% confidence. In production, false positives can be tuned by raising per-category `MIN_MODERATION_CONFIDENCE` thresholds or introducing a human review workflow for `REJECTED` items.
@@ -25,7 +25,7 @@ pre: " <b> 5.5. </b> "
 
 The DLQ experiment also validated **IAM Least Privilege**: the captured failure payload reported `AccessDeniedException … not authorized to perform: dynamodb:UpdateItem on resource: …table/khong-ton-tai`, confirming IAM blocks writes to any table other than `imageguard-images`.
 
-![DLQ message: RetriesExhausted](/fcj-workshop-template/images/5-workshop/15-2b-dlq-message-body.jpg)
+![DLQ message: RetriesExhausted](/fcj-workshop/images/5-workshop/15-2b-dlq-message-body.jpg)
 
 ## Security Verification
 
@@ -39,9 +39,9 @@ The DLQ experiment also validated **IAM Least Privilege**: the captured failure 
 | HTTP Response Headers | Security headers present | ✅ HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy verified |
 | OAuth login flow | PKCE enforced | ✅ Authorization URL includes `code_challenge_method=S256` |
 
-![API without a token returns 401](/fcj-workshop-template/images/5-workshop/27-1-api-no-token.jpg)
+![API without a token returns 401](/fcj-workshop/images/5-workshop/27-1-api-no-token.jpg)
 
-![Direct S3 access is denied](/fcj-workshop-template/images/5-workshop/27-2-s3-web-direct-denied.jpg)
+![Direct S3 access is denied](/fcj-workshop/images/5-workshop/27-2-s3-web-direct-denied.jpg)
 
 Static assets are served from CloudFront's **SGN (Ho Chi Minh City)** edge location, keeping frontend load times fast for Vietnamese users despite the backend residing in `us-east-1`.
 
@@ -55,16 +55,16 @@ Static assets are served from CloudFront's **SGN (Ho Chi Minh City)** edge locat
 - **Cause:** Early code published the SNS alert **before** running the conditional DynamoDB `UpdateItem`. When an upload key did not match the pending item, DynamoDB rejected the update while the email was already dispatched.
 - **Fix:** Reorder operations so `publish_alert` executes only after `UpdateItem` returns `True`. If SNS publishing fails, log an `ERROR` and emit `AlertPublishFailed` for CloudWatch Alarms rather than triggering duplicate retries.
 
-![Email arrived while the item was still PENDING](/fcj-workshop-template/images/5-workshop/t-1-bug-email-before-update.png)
+![Email arrived while the item was still PENDING](/fcj-workshop/images/5-workshop/t-1-bug-email-before-update.png)
 
 ### 3. CloudWatch Alarms Failed to Send Emails
 - **Symptom:** Alarms transitioned to `ALARM` without delivering emails, and alarm history showed *"Failed to execute action"*—even though Lambda-originated `REJECTED` emails still arrived.
 - **Cause:** The SNS topic used AWS-managed KMS encryption (`alias/aws/sns`), which does not authorize CloudWatch Alarms to call `kms:GenerateDataKey`.
 - **Fix:** Disable encryption on `imageguard-alerts` (notifications only include `userId` and `imageId`, never images or links), restoring *"Successfully executed action"*. If encryption is required by policy, attach a Customer Managed Key (~USD 1/month) granting access to `cloudwatch.amazonaws.com`.
 
-![Failed to execute action](/fcj-workshop-template/images/5-workshop/28-3a-bug-sns-kms-failed.jpg)
+![Failed to execute action](/fcj-workshop/images/5-workshop/28-3a-bug-sns-kms-failed.jpg)
 
-![Successfully executed action after the fix](/fcj-workshop-template/images/5-workshop/28-3b-fix-sns-alarm-success.jpg)
+![Successfully executed action after the fix](/fcj-workshop/images/5-workshop/28-3b-fix-sns-alarm-success.jpg)
 
 ### 4. Updated AWS Console Navigation Differences
 - In the updated Lambda Console, execution role selection appears under **Custom settings → Additional settings → Custom execution role**.

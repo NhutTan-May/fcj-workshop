@@ -17,6 +17,6 @@ Toàn bộ kiến trúc vận hành theo mô hình **hướng sự kiện (event
 | **Thời gian thực hiện** | 3 – 4 giờ |
 | **Cấp độ** | 200 – Intermediate |
 | **Dịch vụ AWS chính** | Amazon S3, AWS Lambda, Amazon Rekognition, Amazon DynamoDB, Amazon API Gateway, Amazon Cognito, Amazon CloudFront, Amazon SNS, Amazon SQS, Amazon CloudWatch, AWS IAM |
-| **Mã nguồn tham khảo** | [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop-template/tree/main/static/code/imageguard) |
+| **Mã nguồn tham khảo** | [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop/tree/main/static/code/imageguard) |
 
 {{% children /%}}

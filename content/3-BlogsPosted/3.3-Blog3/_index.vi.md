@@ -23,7 +23,7 @@ Tính năng này đặc biệt hữu ích cho các doanh nghiệp vận hành nh
 
 **Hình ảnh:**
 
-![AWS Account Access Manager Architecture](/fcj-workshop-template/images/3-Blog/Blog03.jpg)
+![AWS Account Access Manager Architecture](/fcj-workshop/images/3-Blog/Blog03.jpg)
 
 **Link:**
 https://www.facebook.com/share/p/1CirzQKZJi/

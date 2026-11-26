@@ -98,6 +98,6 @@ Attending **AWS Student Community Day Vietnam 2026** on Saturday morning, **Nove
 - Student tech communities serve as an invaluable launchpad for developing both technical depth and soft skills on the path toward becoming a Cloud & AI engineer.
 
 #### Some event photos
-- ![Event photo from AWS Student Community Day Vietnam 2026 at Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event03.jpg)
+- ![Event photo from AWS Student Community Day Vietnam 2026 at Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event03.jpg)
 
 > Overall, **AWS Student Community Day Vietnam 2026** was a meaningful highlight of my internship, sharpening my enterprise cloud security mindset while deepening my connection with the vibrant student AWS community in Ho Chi Minh City.

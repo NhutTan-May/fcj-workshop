@@ -21,7 +21,7 @@ Cost modeling was built using the **AWS Pricing Calculator**: [view estimate](ht
 | CloudFront, Cognito, SNS, SQS | Within Free Tier allowances | 0.00 |
 | **Total** | | **USD 8.37/month** (≈ USD 100/year) |
 
-![AWS Pricing Calculator](/fcj-workshop-template/images/5-workshop/29-1-pricing-calculator-summary.jpg)
+![AWS Pricing Calculator](/fcj-workshop/images/5-workshop/29-1-pricing-calculator-summary.jpg)
 
 **Actual workshop spend:** under 300 test images incurred only **USD 0.30–0.60** in Rekognition charges, while all remaining services stayed within the AWS Free Tier.
 

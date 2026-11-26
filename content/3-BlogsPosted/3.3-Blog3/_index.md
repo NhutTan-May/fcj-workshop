@@ -23,6 +23,6 @@ This feature is especially useful for multi-account AWS environments where secur
 
 **Image:**
 
-![AWS Account Access Manager Architecture](/fcj-workshop-template/images/3-Blog/Blog03.jpg)
+![AWS Account Access Manager Architecture](/fcj-workshop/images/3-Blog/Blog03.jpg)
 
 **Link:** https://www.facebook.com/share/p/1CirzQKZJi/

@@ -6,7 +6,7 @@ chapter: false
 pre: " <b> 5.3. </b> "
 ---
 
-![ImageGuard Architecture Diagram](/fcj-workshop-template/images/2-proposal/imageguard-architecture.drawio.png)
+![ImageGuard Architecture Diagram](/fcj-workshop/images/2-proposal/imageguard-architecture.drawio.png)
 
 ## End-to-End Request Flow
 

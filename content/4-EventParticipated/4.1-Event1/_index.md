@@ -87,6 +87,6 @@ Attending **Buildrathon Kickoff: Code the Future with CMC Global** at the AWS Vi
 - Asking speakers and mentors specific questions early is one of the fastest ways to clear both technical doubts and career direction questions.
 
 #### Some event photos
-- ![Group photo at Buildrathon Kickoff event at Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event01.jpg)
+- ![Group photo at Buildrathon Kickoff event at Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event01.jpg)
 
 > Overall, the kickoff event not only gave me foundational hands-on exposure to Generative AI and AI Agents on AWS, but also connected me with motivated peers and built strong momentum for the rest of the internship and Buildathon journey.

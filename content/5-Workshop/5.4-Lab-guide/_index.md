@@ -6,7 +6,7 @@ chapter: false
 pre: " <b> 5.4. </b> "
 ---
 
-Complete source code (all 3 Lambdas, static frontend, and automation scripts): [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop-template/tree/main/static/code/imageguard). Throughout this lab, replace `<ACCOUNT_ID>` with your 12-digit AWS Account ID.
+Complete source code (all 3 Lambdas, static frontend, and automation scripts): [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop/tree/main/static/code/imageguard). Throughout this lab, replace `<ACCOUNT_ID>` with your 12-digit AWS Account ID.
 
 ## Step 1 – Provision Foundation Resources
 
@@ -21,7 +21,7 @@ After creation, apply two additional settings:
 - **Management → Lifecycle rule**: create `delete-uploads-30d` scoped to prefix `uploads/`, expiring objects after **30 days**.
 - **Permissions → Bucket policy**: deny any request where `aws:SecureTransport` is `false` (enforce HTTPS).
 
-![S3 Block public access and bucket policy](/fcj-workshop-template/images/5-workshop/1-4-s3-permissions.png)
+![S3 Block public access and bucket policy](/fcj-workshop/images/5-workshop/1-4-s3-permissions.png)
 
 ### 1.2. Create the DynamoDB Table
 Open **DynamoDB → Create table**:
@@ -97,7 +97,7 @@ Open **IAM → Roles → Create role**:
 
 Verify that the Review screen lists **6 services**. If IAM reports *"The policy failed legacy parsing"*, inspect `<ACCOUNT_ID>` formatting (Section 5.5).
 
-![The role has a single inline policy](/fcj-workshop-template/images/5-workshop/5-4-iam-role-summary.png)
+![The role has a single inline policy](/fcj-workshop/images/5-workshop/5-4-iam-role-summary.png)
 
 ## Step 2 – Deploy `process-image` Lambda and S3 Trigger
 
@@ -107,9 +107,9 @@ Open **Lambda → Create function → Author from scratch**:
 - Runtime: **Python 3.12** · Architecture: **arm64**
 - **Additional settings → Custom execution role:** select `imageguard-process-image-role` · keep Function URL disabled.
 
-![Creating the process-image Lambda](/fcj-workshop-template/images/5-workshop/6-1-lambda-create.png)
+![Creating the process-image Lambda](/fcj-workshop/images/5-workshop/6-1-lambda-create.png)
 
-Paste [`process_image/lambda_function.py`](https://github.com/NhutTan-May/fcj-workshop-template/blob/main/static/code/imageguard/process_image/lambda_function.py) and click **Deploy**. Under **Configuration → General configuration**, set **Memory = 256 MB** and **Timeout = 30 seconds**, then define the environment variables:
+Paste [`process_image/lambda_function.py`](https://github.com/NhutTan-May/fcj-workshop/blob/main/static/code/imageguard/process_image/lambda_function.py) and click **Deploy**. Under **Configuration → General configuration**, set **Memory = 256 MB** and **Timeout = 30 seconds**, then define the environment variables:
 
 | Environment Variable | Value |
 |---|---|
@@ -145,13 +145,13 @@ Custom metrics are emitted using **CloudWatch Embedded Metric Format (EMF)**: pr
 - Under **Destinations → Add destination**: choose **On failure** → **SQS queue** `imageguard-process-dlq`.
 - Click **Add trigger → S3**: select `imageguard-images-<ACCOUNT_ID>`, Event type **PUT**, Prefix `uploads/`, Suffix `.jpg`.
 
-![Function overview: S3 → Lambda → SQS](/fcj-workshop-template/images/5-workshop/11-2-lambda-overview.png)
+![Function overview: S3 → Lambda → SQS](/fcj-workshop/images/5-workshop/11-2-lambda-overview.png)
 
 ## Step 3 – Set Up Cognito, API Gateway, and Static Web App
 
-You can configure Step 3 manually in the Console as outlined below, or run [`setup.sh`](https://github.com/NhutTan-May/fcj-workshop-template/blob/main/static/code/imageguard/scripts/setup.sh) inside **AWS CloudShell** to provision the entire stack via AWS CLI in ~3 minutes.
+You can configure Step 3 manually in the Console as outlined below, or run [`setup.sh`](https://github.com/NhutTan-May/fcj-workshop/blob/main/static/code/imageguard/scripts/setup.sh) inside **AWS CloudShell** to provision the entire stack via AWS CLI in ~3 minutes.
 
-![Output of setup.sh in CloudShell](/fcj-workshop-template/images/5-workshop/23-0-cloudshell-setup-output.jpg)
+![Output of setup.sh in CloudShell](/fcj-workshop/images/5-workshop/23-0-cloudshell-setup-output.jpg)
 
 ### 3.1. Create the Two API Lambdas
 Create two dedicated least-privilege IAM roles, then deploy two **Python 3.12 (arm64)** Lambda functions configured with **128 MB RAM** and **10-second timeout**:
@@ -164,11 +164,11 @@ Create two dedicated least-privilege IAM roles, then deploy two **Python 3.12 (a
 `presign-upload` reads `userId` from `requestContext.authorizer.jwt.claims.sub`, generates a UUID `imageId`, writes a `PENDING` record to DynamoDB, and signs a Presigned PUT URL. Because presigned URLs inherit the signing Lambda's permissions, its role must hold `s3:PutObject`.
 
 ### 3.2. Host the Static Frontend on S3 + CloudFront (OAC)
-1. Create private bucket `imageguard-web-<ACCOUNT_ID>` (Block Public Access enabled, SSE-S3) and upload `index.html`, `app.js`, and `config.js` from [`static/code/imageguard/web`](https://github.com/NhutTan-May/fcj-workshop-template/tree/main/static/code/imageguard/web).
+1. Create private bucket `imageguard-web-<ACCOUNT_ID>` (Block Public Access enabled, SSE-S3) and upload `index.html`, `app.js`, and `config.js` from [`static/code/imageguard/web`](https://github.com/NhutTan-May/fcj-workshop/tree/main/static/code/imageguard/web).
 2. Under **CloudFront → Create distribution**, select `imageguard-web-<ACCOUNT_ID>` with **OAC**, **Redirect HTTP to HTTPS**, `CachingOptimized`, `SecurityHeadersPolicy`, default root object `index.html`, and WAF disabled.
 3. Update the web bucket policy to grant read access exclusively to `cloudfront.amazonaws.com` scoped by `AWS:SourceArn`.
 
-![ImageGuard served through CloudFront](/fcj-workshop-template/images/5-workshop/21-4-web-first-load.jpg)
+![ImageGuard served through CloudFront](/fcj-workshop/images/5-workshop/21-4-web-first-load.jpg)
 
 ### 3.3. Configure Amazon Cognito
 Create User Pool `imageguard-users` with **email** sign-in and self-registration enabled. Add a **Public SPA App Client (no client secret)** configured with:
@@ -177,7 +177,7 @@ Create User Pool `imageguard-users` with **email** sign-in and self-registration
 - Callback and Sign-out URL: `https://<CLOUDFRONT_DOMAIN>/`
 - Provision a Cognito Domain to enable **Managed Login**.
 
-![Cognito Managed Login page](/fcj-workshop-template/images/5-workshop/26-0-cognito-managed-login.jpg)
+![Cognito Managed Login page](/fcj-workshop/images/5-workshop/26-0-cognito-managed-login.jpg)
 
 ### 3.4. Configure API Gateway HTTP API
 - Create HTTP API `imageguard-api` with an auto-deploying `$default` stage and routes `POST /upload-url` → `presign-upload` and `GET /images` → `get-images`.
@@ -191,7 +191,7 @@ Create User Pool `imageguard-users` with **email** sign-in and self-registration
 
 ## Step 4 – Configure CloudWatch Observability
 
-Run [`step4.sh`](https://github.com/NhutTan-May/fcj-workshop-template/blob/main/static/code/imageguard/scripts/step4.sh) in CloudShell, or configure these 7 alarms manually in the CloudWatch Console:
+Run [`step4.sh`](https://github.com/NhutTan-May/fcj-workshop/blob/main/static/code/imageguard/scripts/step4.sh) in CloudShell, or configure these 7 alarms manually in the CloudWatch Console:
 
 | Alarm Name | Metric | Threshold (5-minute period) |
 |---|---|---|
@@ -203,4 +203,4 @@ Run [`step4.sh`](https://github.com/NhutTan-May/fcj-workshop-template/blob/main/
 
 All alarms notify `imageguard-alerts` on both **ALARM** and **OK** state transitions. The `imageguard` CloudWatch Dashboard surfaces `APPROVED`/`REJECTED` counts, processing latency, Lambda errors, API 5xx counts, DLQ depth, and alarm states. Finally, enforce **14-day log retention** on all three Lambda log groups.
 
-![imageguard CloudWatch dashboard](/fcj-workshop-template/images/5-workshop/28-4-dashboard.png)
+![imageguard CloudWatch dashboard](/fcj-workshop/images/5-workshop/28-4-dashboard.png)

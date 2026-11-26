@@ -17,6 +17,6 @@ The entire platform follows an **event-driven serverless architecture** deployed
 | **Estimated duration** | 3 – 4 hours |
 | **Level** | 200 – Intermediate |
 | **Core AWS services** | Amazon S3, AWS Lambda, Amazon Rekognition, Amazon DynamoDB, Amazon API Gateway, Amazon Cognito, Amazon CloudFront, Amazon SNS, Amazon SQS, Amazon CloudWatch, AWS IAM |
-| **Source code** | [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop-template/tree/main/static/code/imageguard) |
+| **Source code** | [static/code/imageguard](https://github.com/NhutTan-May/fcj-workshop/tree/main/static/code/imageguard) |
 
 {{% children /%}}

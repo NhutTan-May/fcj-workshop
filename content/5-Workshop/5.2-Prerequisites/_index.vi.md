@@ -17,7 +17,7 @@ pre: " <b> 5.2. </b> "
 | `imageguard-dev` | `AmazonS3FullAccess`, `AmazonDynamoDBFullAccess`, `AmazonSNSFullAccess`, `AmazonSQSFullAccess`, `AWSLambda_FullAccess`, `IAMFullAccess`, `CloudWatchFullAccessV2`, `AmazonRekognitionReadOnlyAccess`, `AWSCloudShellFullAccess` |
 | `imageguard-dev-2` | `AmazonCognitoPowerUser`, `AmazonAPIGatewayAdministrator`, `CloudFrontFullAccess` |
 
-![Group IAM với các policy](/fcj-workshop-template/images/5-workshop/0-1-iam-group-policies.png)
+![Group IAM với các policy](/fcj-workshop/images/5-workshop/0-1-iam-group-policies.png)
 
 {{% notice warning %}}
 Policy `IAMFullAccess` cho phép người dùng tự mở rộng quyền (privilege escalation). Trong phạm vi lab cá nhân, quyền này cần thiết để tạo role riêng cho từng Lambda; khi triển khai ở môi trường production, hãy giới hạn bằng **IAM Permission Boundary**.

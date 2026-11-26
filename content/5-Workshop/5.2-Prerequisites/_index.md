@@ -17,7 +17,7 @@ pre: " <b> 5.2. </b> "
 | `imageguard-dev` | `AmazonS3FullAccess`, `AmazonDynamoDBFullAccess`, `AmazonSNSFullAccess`, `AmazonSQSFullAccess`, `AWSLambda_FullAccess`, `IAMFullAccess`, `CloudWatchFullAccessV2`, `AmazonRekognitionReadOnlyAccess`, `AWSCloudShellFullAccess` |
 | `imageguard-dev-2` | `AmazonCognitoPowerUser`, `AmazonAPIGatewayAdministrator`, `CloudFrontFullAccess` |
 
-![IAM group policies configuration](/fcj-workshop-template/images/5-workshop/0-1-iam-group-policies.png)
+![IAM group policies configuration](/fcj-workshop/images/5-workshop/0-1-iam-group-policies.png)
 
 {{% notice warning %}}
 `IAMFullAccess` permits privilege escalation. It is acceptable in this sandboxed workshop so you can create dedicated Lambda execution roles; in production environments, constrain it using an **IAM Permission Boundary**.

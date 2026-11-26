@@ -23,6 +23,6 @@ This feature is especially valuable for organizations operating large-scale micr
 
 **Image:**
 
-![Amazon ECS Gateway Architecture](/fcj-workshop-template/images/3-Blog/Blog01.png)
+![Amazon ECS Gateway Architecture](/fcj-workshop/images/3-Blog/Blog01.png)
 
 **Link:** https://www.facebook.com/share/p/18m9M4gdzv/

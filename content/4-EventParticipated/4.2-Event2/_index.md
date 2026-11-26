@@ -92,6 +92,6 @@ Attending **AWS Cloud and AI Day Hanoi - Watch Party Ho Chi Minh City** at the A
 - The spirit of *"Why not make every idea possible?"* encourages taking initiative with cloud tools to prototype software ideas rapidly and safely.
 
 #### Some event photos
-- ![Check-in at the Watch Party venue at Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event02.jpg)
+- ![Check-in at the Watch Party venue at Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event02.jpg)
 
 > Overall, the event not only kept me up to date with AWS's latest cloud and AI advances, but also inspired me and gave me a clearer direction for growing my career in Cloud Computing and Artificial Intelligence.

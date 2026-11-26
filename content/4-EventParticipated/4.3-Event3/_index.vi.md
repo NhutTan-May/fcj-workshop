@@ -94,7 +94,7 @@ Tham gia **AWS Student Community Day Vietnam 2026** vào sáng thứ Bảy ngày
 - Phần **Bế mạc sự kiện** khép lại buổi sáng cuối tuần trọn vẹn, tiếp thêm động lực để tôi hoàn thiện những chặng cuối của kỳ thực tập và tiếp tục gắn bó với cộng đồng AWS tại Việt Nam.
 
 #### Một số hình ảnh khi tham gia sự kiện
-- ![Check-in ở hội trường theo dõi tại Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event03.jpg)
+- ![Check-in ở hội trường theo dõi tại Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event03.jpg)
 
 
 #### Bài học rút ra
@@ -102,6 +102,6 @@ Tham gia **AWS Student Community Day Vietnam 2026** vào sáng thứ Bảy ngày
 - Cộng đồng sinh viên công nghệ là bệ phóng tuyệt vời để rèn luyện cả kỹ năng chuyên môn lẫn kỹ năng mềm, giúp mỗi cá nhân tiến xa hơn trên con đường trở thành kỹ sư Cloud & AI chuyên nghiệp.
 
 #### Một số hình ảnh khi tham gia sự kiện
-- ![Hình ảnh tham gia sự kiện AWS Student Community Day Vietnam 2026 tại Bitexco Financial Tower](/fcj-workshop-template/images/4-Events/Event03.jpg)
+- ![Hình ảnh tham gia sự kiện AWS Student Community Day Vietnam 2026 tại Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event03.jpg)
 
 > Tổng thể, **AWS Student Community Day Vietnam 2026** là một điểm nhấn ý nghĩa trong hành trình thực tập, vừa giúp củng cố tư duy bảo mật đám mây doanh nghiệp, vừa kết nối tôi sâu hơn với mạng lưới sinh viên và cộng đồng AWS trẻ đầy nhiệt huyết tại TP.HCM.
