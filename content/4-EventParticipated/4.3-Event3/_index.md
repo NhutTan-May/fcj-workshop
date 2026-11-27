@@ -99,5 +99,6 @@ Attending **AWS Student Community Day Vietnam 2026** on Saturday morning, **Nove
 
 #### Some event photos
 - ![Event photo from AWS Student Community Day Vietnam 2026 at Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event03.jpg)
+- ![Group photo at AWS Student Community Day Vietnam 2026 at Bitexco Financial Tower](/fcj-workshop/images/4-Events/Event03.1.jpg)
 
 > Overall, **AWS Student Community Day Vietnam 2026** was a meaningful highlight of my internship, sharpening my enterprise cloud security mindset while deepening my connection with the vibrant student AWS community in Ho Chi Minh City.

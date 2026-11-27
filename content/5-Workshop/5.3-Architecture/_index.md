@@ -53,6 +53,23 @@ pre: " <b> 5.3. </b> "
 
 > **Note on Rekognition:** `DetectModerationLabels` and `DetectLabels` do not support resource-level ARN scoping, so `"Resource": "*"` is required. To preserve least privilege, only those two exact actions are permitted—never `rekognition:*`.
 
+## Data Backup & Recovery
+
+The `imageguard-images` DynamoDB table enables **Point-in-time recovery (PITR)**, allowing second-level restoration to any moment within the preceding **35 days** in case of accidental deletion or bad writes. Paired with Amazon S3's **99.999999999%** durability for source image objects, both metadata and raw assets can be restored consistently.
+
+```bash
+aws dynamodb update-continuous-backups --table-name imageguard-images \
+  --point-in-time-recovery-specification PointInTimeRecoveryEnabled=true
+# Expected output: ENABLED
+```
+
+## Why Choose Region `us-east-1`?
+
+- **Lowest baseline pricing:** `us-east-1` (N. Virginia) typically offers the lowest rates across AWS services—including **Amazon Rekognition**, which drives most of the monthly bill (USD 5.91 out of USD 8.37/month; see Section 5.6).
+- **Full service availability:** Every component required by the workshop (Rekognition Content Moderation, Cognito Managed Login, HTTP API, etc.) is immediately available in `us-east-1`.
+- **Network latency is not the bottleneck:** Although round-trip latency from Vietnam to `us-east-1` is roughly 200 ms, static assets are cached at CloudFront edge nodes close to users, while backend latency is dominated by AI inference (~0.5–1 second).
+- **Production rollout path for Vietnam:** Moving to Singapore (`ap-southeast-1`) for lower latency and regional data residency requires only updating environment variables—no code changes needed.
+
 ## Why Lambda Is Not Placed Inside a VPC
 
 ImageGuard has no private RDS database or internal server requiring private subnet isolation. Every AWS API call (S3, DynamoDB, Rekognition, SNS) runs over HTTPS with IAM SigV4 authentication. Moving Lambdas into a VPC would introduce NAT Gateway or Interface VPC Endpoint charges (tens of USD per month) without meaningful security gain for this serverless pattern.

@@ -17,7 +17,7 @@ pre: " <b> 2. </b> "
 **ImageGuard** is a serverless web application built for classified-ad sites, community forums, and student clubs to **automatically moderate and tag user-uploaded images**. Whenever a user submits an image, **Amazon Rekognition** performs two tasks:
 
 1. **Content moderation:** screens for unsafe or inappropriate material (violence, explicit imagery, weapons, illicit substances, etc.). Violating uploads are marked `REJECTED`, and administrators receive an email notification.
-2. **Automatic labeling:** assigns descriptive tags to approved images (such as *Laptop*, *Bicycle*, or *Book*) so users can **search their uploaded images by label**.
+2. **Automatic labeling:** assigns descriptive tags to approved images (such as *Laptop*, *Bicycle*, or *Book*) so users can immediately see what an image contains and administrators can review records when needed.
 
 Analysis results are persisted in **Amazon DynamoDB** and reflected in the web UI within seconds. Built on an **event-driven serverless architecture**, ImageGuard eliminates server management overhead and incurs charges strictly per request and image processed.
 
@@ -27,13 +27,13 @@ Analysis results are persisted in **Amazon DynamoDB** and reflected in the web U
 - Without automated screening, policy-violating images may become publicly visible, harming users and damaging platform trust.
 - Uploaded photos rarely include **descriptions or tags**, making subsequent search and discovery difficult.
 
-**Proposed solution:** automate both content screening and descriptive tagging immediately upon upload using managed AI, blocking unsafe images before exposure while indexing clean ones for fast lookup.
+**Proposed solution:** automate both content screening and descriptive tagging immediately upon upload using managed AI, blocking unsafe images before exposure while labeling valid ones with descriptive content tags.
 
 ## 3. Objectives & Scope
 
 ### 3.1. Objectives
 
-1. Deliver a fully automated pipeline (**Image Upload → AI Moderation → AI Labeling → Storage → Display & Search**) running end-to-end on AWS.
+1. Deliver a fully automated pipeline (**Image Upload → AI Moderation → AI Labeling → Storage → Display**) running end-to-end on AWS.
 2. Enforce the **AWS Well-Architected Framework**, emphasizing the **Security** pillar (IAM Least Privilege, zero public buckets, no hard-coded credentials).
 3. Implement centralized observability with **Amazon CloudWatch** (Logs, Metrics, Alarms, Dashboard) and email alerts via **Amazon SNS**.
 4. Maintain monthly operating expenses around **USD 8–9/month** under the target workload profile (Section 6).
@@ -57,7 +57,7 @@ Analysis results are persisted in **Amazon DynamoDB** and reflected in the web U
 |---|---|
 | JPG/PNG images, ≤ 5 MB | Video and animated GIFs |
 | Content moderation + automated object/scene labeling | **Facial recognition** (biometric and privacy-sensitive data) |
-| Label-based filtering within the signed-in user's own images | System-wide full-text search |
+| Display status and labels of each image inside the signed-in user's own gallery | Label-based search/filtering and system-wide full-text search (future work) |
 | Sign-up / sign-in via Amazon Cognito | Dedicated admin portal and moderation appeal workflows |
 | Single Region: **us-east-1** | Multi-Region active-active / Disaster Recovery |
 
@@ -103,9 +103,9 @@ Numbers align with Figure 1 above.
 | 7 | `process-image` → DynamoDB | Conditionally updates the record to `APPROVED` (with labels) or `REJECTED` (if blocked category confidence ≥ 60%) |
 | 8 | `process-image` → SNS → Admin | Only when marked `REJECTED` **and** step 7 succeeded: sends an alert email to the administrator |
 | 9 | `process-image` → SQS DLQ | After 2 failed Lambda retries, the failing event lands in the **DLQ** |
-| 10 | User → API Gateway | Frontend requests `GET /images?label=...` with the JWT token |
+| 10 | User → API Gateway | Frontend requests `GET /images` with the JWT token |
 | 10a | API Gateway → Lambda `get-images` | Invokes the query Lambda |
-| 10b | `get-images` → DynamoDB | Queries **strictly by `userId` extracted from the JWT `sub` claim** and generates short-lived presigned GET URLs for `APPROVED` images |
+| 10b | `get-images` → DynamoDB | Queries **strictly by `userId` extracted from the JWT `sub` claim**, sorted newest-first, and generates short-lived presigned GET URLs for `APPROVED` images |
 | 11 | 3 Lambdas → CloudWatch | Emits structured logs and Embedded Metric Format (EMF) custom metrics |
 | 12 | CloudWatch → SNS | Triggers email alerts on Lambda errors, non-empty DLQ, or API 5xx spikes |
 | — | IAM → 3 Lambdas | Attaches a separate least-privilege **IAM execution role** to each Lambda (Section 4.3) |
@@ -142,7 +142,7 @@ The original concept relied on **Amazon Bedrock** for document/invoice analysis,
 
 ## 5. Plan & Timeline
 
-Internship period: 14/09/2026 – 04/12/2026. Target workshop submission: **19/11/2026**.
+Internship period: 14/09/2026 – 14/12/2026. Workshop submission deadline: **30/11/2026** (per FCAJ schedule).
 
 ### 5.1. Team Roles
 
@@ -164,11 +164,11 @@ Internship period: 14/09/2026 – 04/12/2026. Target workshop submission: **19/1
 | Week 8 | 02/11 – 08/11 | Quota request rejected; pivot to Rekognition, author Proposal v2.0; build S3, DynamoDB, IAM roles, `process-image` + S3 Event | Proposal v2.0, working processing pipeline |
 | Week 9 | 09/11 – 15/11 | Cognito, API Gateway, API Lambdas; static frontend + CloudFront; CloudWatch metrics/alarms/dashboard, SNS, DLQ; testing; Pricing Calculator; demo recording | End-to-end demo, video, cost estimate |
 | Week 10 | 16/11 – 19/11 | Author bilingual `5-Workshop` docs (lab guide, testing, clean-up), capture screenshots, polish diagrams, peer review | **Workshop submission 19/11** |
-| Week 10–12 | 20/11 – 04/12 | Address mentor feedback, finalize blogs and worklogs, clean up resources | Final internship report |
+| Week 10–12 | 20/11 – 14/12 | Address mentor feedback, finalize blogs and worklogs, clean up resources | Final internship report |
 
 ## 6. Cost Estimation
 
-**Workload assumptions:** a small forum/classifieds platform processing **3,000 images/month** (~100/day, ~1 MB average, ~3% violation rate) with 30,000 monthly gallery views/searches in **us-east-1** (on-demand pricing **before Free Tier/credits**).
+**Workload assumptions:** a small forum/classifieds platform processing **3,000 images/month** (~100/day, ~1 MB average, ~3% violation rate) with 30,000 monthly gallery views in **us-east-1** (on-demand pricing **before Free Tier/credits**).
 
 | Service | Usage Assumptions | Est. Monthly Cost (USD) |
 |---|---|---|
@@ -215,7 +215,7 @@ During development and workshop demos (< 300 images), Rekognition spend is rough
 
 ## 8. Expected Outcomes
 
-- A live end-to-end serverless web application: login → image upload → violating images blocked with admin email alert, valid images auto-labeled and searchable.
+- A live end-to-end serverless web application: login → image upload → violating images blocked with admin email alert, valid images auto-labeled and listed in the user's gallery.
 - Complete observability stack with CloudWatch Dashboard, Alarms, and SNS email notifications.
 - A reproducible bilingual workshop guide covering setup, testing, troubleshooting, cost analysis, and resource clean-up.
 - Practical team mastery of event-driven serverless design, IAM Least Privilege, managed AI integration, observability, cost control, and architectural pivoting under quota constraints.

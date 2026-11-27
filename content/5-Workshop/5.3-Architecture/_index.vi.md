@@ -53,6 +53,23 @@ pre: " <b> 5.3. </b> "
 
 > **Lưu ý về Rekognition:** Các API `DetectModerationLabels` và `DetectLabels` không hỗ trợ giới hạn quyền theo ARN tài nguyên cụ thể nên bắt buộc khai báo `"Resource": "*"`. Để bù lại, policy chỉ mở đúng 2 action cần thiết và tuyệt đối không dùng `rekognition:*`.
 
+## Sao lưu dữ liệu (Backup & Recovery)
+
+Bảng DynamoDB `imageguard-images` được bật tính năng **Point-in-time recovery (PITR)**, cho phép khôi phục dữ liệu về bất kỳ thời điểm nào theo từng giây trong vòng **35 ngày gần nhất** nếu xảy ra sự cố xóa nhầm hoặc ghi sai dữ liệu. Kết hợp với độ bền lưu trữ **99,999999999%** của Amazon S3 đối với tệp ảnh gốc, hệ thống có thể phục hồi đồng bộ cả metadata lẫn ảnh khi cần.
+
+```bash
+aws dynamodb update-continuous-backups --table-name imageguard-images \
+  --point-in-time-recovery-specification PointInTimeRecoveryEnabled=true
+# Kết quả trả về: ENABLED
+```
+
+## Vì sao chọn Region `us-east-1`?
+
+- **Chi phí tối ưu nhất:** `us-east-1` (N. Virginia) có mức giá thấp nhất trong phần lớn các Region, đặc biệt đối với **Amazon Rekognition** — dịch vụ chiếm phần lớn chi phí hệ thống (5,91 / 8,37 USD/tháng, xem mục 5.6).
+- **Đầy đủ dịch vụ cần thiết:** Toàn bộ các dịch vụ trong kiến trúc (Rekognition Content Moderation, Cognito Managed Login, HTTP API…) đều hỗ trợ đầy đủ tại `us-east-1`.
+- **Độ trễ mạng không phải điểm nghẽn:** Dù độ trễ từ Việt Nam tới `us-east-1` khoảng 200 ms, giao diện web tĩnh đã được CloudFront phân phối từ edge location gần người dùng; bước tốn thời gian nhất là khâu AI phân tích ảnh (~0,5–1 giây).
+- **Phương án triển khai thực tế tại Việt Nam:** Nếu đưa vào vận hành chính thức cho người dùng trong nước, chỉ cần chuyển sang Region Singapore (`ap-southeast-1`) qua biến môi trường để giảm độ trễ và đáp ứng yêu cầu lưu trữ dữ liệu khu vực mà không cần sửa mã nguồn.
+
 ## Lý do không đưa Lambda vào VPC
 
 Trong kiến trúc ImageGuard, không có cơ sở dữ liệu hay máy chủ nội bộ nào yêu cầu đặt trong private subnet. Các hàm Lambda giao tiếp trực tiếp với S3, DynamoDB, Rekognition và SNS qua giao thức HTTPS và được xác thực bằng chữ ký IAM. Nếu đặt Lambda vào VPC, hệ thống phải gánh thêm chi phí NAT Gateway hoặc Interface VPC Endpoints (hàng chục USD/tháng) trong khi không mang lại giá trị bảo mật đáng kể cho mô hình này.
