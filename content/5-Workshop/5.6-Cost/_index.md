@@ -25,6 +25,16 @@ Cost modeling was built using the **AWS Pricing Calculator**: [view estimate](ht
 
 **Actual workshop spend:** under 300 test images incurred only **USD 0.30–0.60** in Rekognition charges, while all remaining services stayed within the AWS Free Tier.
 
+## Cost Scaling Projection (Linear Estimate)
+
+| Monthly Volume | Amazon Rekognition | Other AWS Services | Estimated Total |
+|---|---|---|---|
+| 3,000 images | USD 5.91 | USD 2.46 | **≈ USD 8.4** |
+| 30,000 images | USD 59.10 | ≈ USD 4.00 | **≈ USD 63** |
+| 300,000 images | USD 591.00 | ≈ USD 25.00 | **≈ USD 616** |
+
+Rekognition accounts for ~70% of monthly spend at 3,000 images and exceeds 90% at scale, whereas CloudWatch charges stay largely flat. The highest-impact optimization is **minimizing Rekognition API calls**: screening before labeling (already implemented) and optionally disabling `DetectLabels` where tags are unnecessary. Volume-tiered pricing applies automatically above 1 million images/month.
+
 ## Applied Cost Optimization Techniques
 
 - **100% Serverless:** avoids fixed EC2, NAT Gateway, or idle 24/7 infrastructure costs.

@@ -273,7 +273,9 @@ Hàm `presign-upload` đọc `userId` từ `requestContext.authorizer.jwt.claims
 2. Vào **CloudFront → Create distribution**: chọn origin là bucket `imageguard-web-<ACCOUNT_ID>`, cấu hình **Origin Access Control (OAC)**, **Redirect HTTP to HTTPS**, cache policy `CachingOptimized`, response headers `SecurityHeadersPolicy`, Default root object `index.html`, không bật WAF.
 3. Cập nhật Bucket Policy cho `imageguard-web-<ACCOUNT_ID>` để chỉ cho phép `cloudfront.amazonaws.com` truy cập với điều kiện `AWS:SourceArn` khớp ARN của distribution.
 
-![Hình 3.2 – Trang ImageGuard qua CloudFront](/fcj-workshop/images/5-workshop/21-5-web-first-load-v2.jpg)
+> **Vì sao dùng OAC và `SecurityHeadersPolicy`?** Bucket web vẫn giữ chế độ *Block all public access* và chỉ cho phép đúng CloudFront Distribution này đọc tệp, chặn truy cập trực tiếp qua link S3 (trả `403`, đã kiểm chứng ở mục 5.5). `SecurityHeadersPolicy` tự động gắn HSTS, X-Frame-Options và X-Content-Type-Options để chống clickjacking và MIME sniffing. AWS WAF chưa bật ở mức lab vì chưa có lưu lượng thật.
+
+![Hình 3.2 – Trang ImageGuard qua CloudFront](/fcj-workshop/images/5-workshop/21-6-web-home-dark.jpg)
 *Hình 3.2 – Trang ImageGuard qua CloudFront*
 
 ### 3.3. Cấu hình Amazon Cognito
@@ -282,6 +284,8 @@ Tạo User Pool `imageguard-users` hỗ trợ đăng nhập bằng **email** và
 - OAuth scopes: `openid`, `email`
 - Callback URL và Sign-out URL: `https://<CLOUDFRONT_DOMAIN>/`
 - Khởi tạo Cognito Domain để bật giao diện **Managed Login**.
+
+> **Vì sao SPA không dùng Client Secret mà dùng PKCE?** Toàn bộ mã frontend chạy trên trình duyệt nên không thể cất giữ bí mật an toàn. Cơ chế **PKCE** thay thế client secret bằng cặp `code_verifier` (ngẫu nhiên trên trình duyệt) và bản băm SHA-256 gửi lúc đăng nhập, giúp kẻ gian có chặn được `code` cũng không đổi được token; tham số `state` chống CSRF và token chỉ giữ trong `sessionStorage`.
 
 ![Hình 3.3 – Trang đăng nhập Cognito Managed Login](/fcj-workshop/images/5-workshop/26-0-cognito-managed-login.jpg)
 *Hình 3.3 – Trang đăng nhập Cognito Managed Login*
@@ -292,12 +296,19 @@ Tạo User Pool `imageguard-users` hỗ trợ đăng nhập bằng **email** và
 - Cấu hình **CORS**: chỉ cho phép origin `https://<CLOUDFRONT_DOMAIN>`, header `authorization, content-type`, method `GET, POST, OPTIONS`.
 - Bật **Throttling** trên default route: `rate = 10`, `burst = 20`.
 
+> **Vì sao cấu hình như vậy?** JWT Authorizer xác thực chữ ký token bằng khóa công khai của User Pool cùng `issuer` và `audience`, giúp chặn request giả mạo hoặc hết hạn ngay tại API Gateway (`401`) mà không kích hoạt Lambda hay tốn phí (đã test E3, E4 ở mục 5.5). CORS khóa chặt theo domain CloudFront và throttling giới hạn tốc độ gọi để bảo vệ chi phí.
+
 ### 3.5. Kết nối các thành phần
 - Thêm cấu hình **CORS** cho bucket ảnh `imageguard-images-<ACCOUNT_ID>` cho phép method `PUT, GET` từ domain CloudFront.
 - Điền đầy đủ thông số (`Cognito domain`, `client ID`, `redirect URI`, `API Gateway URL`) vào file `config.js`, tải lại lên bucket web và tạo **CloudFront Invalidation** `/*`.
 
-![Hình 3.4 – Kết quả cuối: người dùng đăng nhập, tải ảnh lên và xem trạng thái APPROVED / REJECTED](/fcj-workshop/images/5-workshop/26-4-web-gallery-v2.jpg)
-*Hình 3.4 – Kết quả cuối: người dùng đăng nhập, tải ảnh lên và xem trạng thái APPROVED / REJECTED*
+![Hình 3.4 – Kết quả cuối: thống kê, ô tải nhiều ảnh, thư viện có lọc theo trạng thái và tìm theo nhãn](/fcj-workshop/images/5-workshop/26-5-web-dashboard-dark.jpg)
+*Hình 3.4 – Kết quả cuối: thống kê, ô tải nhiều ảnh, thư viện có lọc theo trạng thái và tìm theo nhãn*
+
+![Hình 3.5 – Cửa sổ chi tiết ảnh: nhãn, thời gian tải lên / xử lý xong, Image ID](/fcj-workshop/images/5-workshop/26-7-web-detail-dark.jpg)
+*Hình 3.5 – Cửa sổ chi tiết ảnh: nhãn, thời gian tải lên / xử lý xong, Image ID*
+
+> **Lưu ý về tính năng giao diện:** Các tiện ích như lọc theo trạng thái, tìm theo nhãn trên danh sách đã tải, sắp xếp, nhãn phổ biến, thống kê, xem chi tiết, tải nhiều ảnh, kiểm tra 3 byte đầu của file JPEG và chuyển đổi ngôn ngữ VI/EN đều xử lý hoàn toàn phía trình duyệt dựa trên dữ liệu trả về từ `GET /images` nên không làm thay đổi kiến trúc backend (hỗ trợ mở trực tiếp bản tiếng Anh qua `?lang=en`).
 
 ## Step 4 – Thiết lập Giám sát trên CloudWatch
 
@@ -312,6 +323,8 @@ Chạy script [`step4.sh`](https://github.com/NhutTan-May/fcj-workshop/blob/main
 | `imageguard-api-5xx` | `AWS/ApiGateway` → `5xx` | ≥ 5 |
 
 Tất cả Alarm đều gửi thông báo về SNS topic `imageguard-alerts` ở cả hai trạng thái **ALARM** và **OK**. Dashboard `imageguard` tổng hợp số lượng ảnh `APPROVED`/`REJECTED`, thời gian xử lý trung bình, lỗi Lambda, lỗi API 5xx, số lượng message trong DLQ và trạng thái Alarm. Cuối cùng, cấu hình **Log retention = 14 ngày** cho cả 3 Log Group của Lambda.
+
+> **Ý nghĩa bộ Alarm & 5 Custom Metric (EMF):** Mỗi Alarm tương ứng một kịch bản lỗi riêng (lỗi hàm Lambda, chạm giới hạn quota `Throttles`, có sự kiện rớt vào DLQ, lỗi gửi email SNS qua custom metric `AlertPublishFailed`, và lỗi `5xx` phía API Gateway). Riêng 5 metric EMF (`ImagesProcessed`, `ImagesApproved`, `ImagesRejected`, `ProcessingLatency`, `AlertPublishFailed`) được CloudWatch tự tách từ dòng log JSON chứa `_aws`, giúp loại bỏ quyền `cloudwatch:PutMetricData` và không tốn thêm API call. Thông báo khi quay về **OK** giúp quản trị viên xác nhận sự cố đã tự phục hồi.
 
 ![Hình 4.1 – Tạo 7 alarm và dashboard bằng step4.sh](/fcj-workshop/images/5-workshop/28-1-step4-alarms-created.jpg)
 *Hình 4.1 – Tạo 7 alarm và dashboard bằng step4.sh*

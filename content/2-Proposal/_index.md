@@ -21,6 +21,11 @@ pre: " <b> 2. </b> "
 
 Analysis results are persisted in **Amazon DynamoDB** and reflected in the web UI within seconds. Built on an **event-driven serverless architecture**, ImageGuard eliminates server management overhead and incurs charges strictly per request and image processed.
 
+**Target Users:**
+- **End Users:** members of classified-ad platforms, forums, or student clubs who upload photos and review their personal upload history.
+- **Platform Administrators:** moderators responsible for content safety who receive immediate email alerts on flagged uploads.
+- **Operations Team:** engineers monitoring processing throughput, errors, and system health via CloudWatch Dashboards and Alarms.
+
 ## 2. Problem Statement
 
 - User-generated platforms (marketplaces, forums, student communities) handle high daily upload volumes. **Manual review** is slow, labor-intensive, and forces human moderators to inspect harmful imagery.
@@ -219,3 +224,12 @@ During development and workshop demos (< 300 images), Rekognition spend is rough
 - Complete observability stack with CloudWatch Dashboard, Alarms, and SNS email notifications.
 - A reproducible bilingual workshop guide covering setup, testing, troubleshooting, cost analysis, and resource clean-up.
 - Practical team mastery of event-driven serverless design, IAM Least Privilege, managed AI integration, observability, cost control, and architectural pivoting under quota constraints.
+
+## 9. Future Work
+
+- **Improve moderation precision:** introduce per-category confidence thresholds (e.g., lowering `Drugs & Tobacco` sensitivity to avoid missing smoking scenes) and benchmark on a 20–50 image validation set.
+- **Human review queue:** route `REJECTED` items to an admin review workflow to mitigate false positives such as toy weapons.
+- **Feature expansion:** add label-based search and filtering, PNG upload support, and a public feed for approved images.
+- **Infrastructure as Code (IaC):** migrate CLI provisioning scripts to AWS SAM or CloudFormation with CI/CD pipelines for automated deployments.
+- **Edge protection:** attach AWS WAF to CloudFront before opening to public production traffic.
+- **Vietnam production rollout:** switch to Singapore (`ap-southeast-1`) for lower latency and regional data residency compliance.

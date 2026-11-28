@@ -17,7 +17,7 @@ pre: " <b> 5.5. </b> "
 | **Upload ngoài luồng** | Tải trực tiếp file lên S3 không có item `PENDING` | Không tạo bản ghi mới và không gửi email cảnh báo |
 | **Cơ chế DLQ** | Đổi `TABLE_NAME` sai và gọi Lambda bất đồng bộ | Sau 2 lần retry thất bại, message `RetriesExhausted` (`approximateInvokeCount: 3`) xuất hiện trong SQS DLQ |
 
-![Gallery: ảnh APPROVED và REJECTED](/fcj-workshop/images/5-workshop/26-4-web-gallery-v2.jpg)
+![Gallery: ảnh APPROVED và REJECTED](/fcj-workshop/images/5-workshop/26-6-web-library-dark.jpg)
 
 {{% notice note %}}
 **Ví dụ về False Positive:** ảnh súng đồ chơi bằng gỗ bị Rekognition nhận diện là *Violence/Weapons* với độ tin cậy ~97%. Trong thực tế, có thể giảm tỉ lệ chặn nhầm bằng cách nâng `MIN_MODERATION_CONFIDENCE` theo từng danh mục hoặc bổ sung bước quản trị viên duyệt lại (appeal) các ảnh `REJECTED`.
@@ -80,6 +80,21 @@ Hai tỉ lệ độ chính xác trên được đo trên **12 ảnh** (gồm 2 �
 ![HTTP chuyển HTTPS và presigned URL hết hạn](/fcj-workshop/images/5-workshop/27-4-https-redirect-presigned-expired.jpg)
 
 Giao diện web được CloudFront phân phối từ edge location **SGN (TP.HCM)**, giúp tốc độ tải trang tại Việt Nam nhanh dù backend triển khai tại `us-east-1`.
+
+## Kiểm thử kịch bản lỗi (Error-Case Testing)
+
+Chạy script [`error_test.sh`](/fcj-workshop/code/imageguard/scripts/error_test.sh) trong CloudShell ngày **28/11/2026**. Các bài test `E1`–`E3` gọi trực tiếp Lambda `imageguard-presign-upload` qua `aws lambda invoke` với đầu vào không hợp lệ; `E4` gửi đồng thời 100 request tới API; `E5` tải lên một tệp văn bản đổi phần mở rộng thành `.jpg`.
+
+| # | Kịch bản kiểm thử | Kết quả kỳ vọng | Kết quả quan sát |
+|---|---|---|---|
+| `E1` | Yêu cầu upload URL với `contentType: image/png` | Từ chối `400` | ✅ `400` – *"Chi chap nhan image/jpeg"* |
+| `E2` | Request body không phải JSON hợp lệ | Từ chối `400` | ✅ `400` – *"Body phai la JSON"* |
+| `E3` | Không có JWT (thiếu claim `sub`) | Từ chối `401` | ✅ `401` – *"Unauthorized"* |
+| `E4` | Gửi song song 100 request `GET /images` không có token | Chặn tại cổng, không gọi Lambda | ✅ 100/100 trả `401` ngay tại JWT Authorizer, Lambda không bị invoke nên không tốn chi phí (ngưỡng throttling 10 req/s, burst 20 chưa kích hoạt trong kịch bản không token này) |
+| `E5` | Tệp văn bản đổi tên thành `.jpg` | Không treo `PENDING`, Lambda không lỗi | ✅ Item chuyển `REJECTED` với lý do `INVALID_IMAGE:InvalidImageFormatException`; Lambda kết thúc bình thường và không đẩy vào DLQ |
+
+![Kết quả 5 test kịch bản lỗi trong CloudShell](/fcj-workshop/images/5-workshop/30-1-error-cases.jpg)
+*Hình: Kết quả chạy `error_test.sh` – E1, E2 trả 400; E3 và E4 trả 401; E5 tệp không hợp lệ bị đánh dấu REJECTED*
 
 ## Các sự cố thực tế và cách khắc phục
 

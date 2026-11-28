@@ -273,7 +273,9 @@ Create two dedicated least-privilege IAM roles, then deploy two **Python 3.12 (a
 2. Under **CloudFront → Create distribution**, select `imageguard-web-<ACCOUNT_ID>` with **OAC**, **Redirect HTTP to HTTPS**, `CachingOptimized`, `SecurityHeadersPolicy`, default root object `index.html`, and WAF disabled.
 3. Update the web bucket policy to grant read access exclusively to `cloudfront.amazonaws.com` scoped by `AWS:SourceArn`.
 
-![Figure 3.2 – ImageGuard web app served via CloudFront](/fcj-workshop/images/5-workshop/21-5-web-first-load-v2.jpg)
+> **Why OAC and `SecurityHeadersPolicy`?** Keeping *Block all public access* enabled guarantees only this CloudFront distribution can read static files, denying direct S3 URL access (`403`, verified in Section 5.5). `SecurityHeadersPolicy` attaches HSTS, X-Frame-Options, and X-Content-Type-Options against clickjacking and MIME sniffing. AWS WAF is omitted in the lab environment and noted as a production enhancement.
+
+![Figure 3.2 – ImageGuard web app served via CloudFront](/fcj-workshop/images/5-workshop/21-6-web-home-dark.jpg)
 *Figure 3.2 – ImageGuard web app served via CloudFront*
 
 ### 3.3. Configure Amazon Cognito
@@ -282,6 +284,8 @@ Create User Pool `imageguard-users` with **email** sign-in and self-registration
 - Scopes: `openid`, `email`
 - Callback and Sign-out URL: `https://<CLOUDFRONT_DOMAIN>/`
 - Provision a Cognito Domain to enable **Managed Login**.
+
+> **Why use PKCE without a Client Secret?** Browser-based SPAs cannot safely conceal a secret inside client-side JavaScript. **PKCE** replaces the secret with a per-login random `code_verifier` and its SHA-256 hash, rendering an intercepted authorization `code` useless, while `state` mitigates CSRF and tokens stay in `sessionStorage` for the active tab.
 
 ![Figure 3.3 – Cognito Managed Login screen](/fcj-workshop/images/5-workshop/26-0-cognito-managed-login.jpg)
 *Figure 3.3 – Cognito Managed Login screen*
@@ -292,12 +296,19 @@ Create User Pool `imageguard-users` with **email** sign-in and self-registration
 - Restrict **CORS** to origin `https://<CLOUDFRONT_DOMAIN>`, headers `authorization, content-type`, and methods `GET, POST, OPTIONS`.
 - Set default-route **throttling** to `rate = 10` and `burst = 20`.
 
+> **Why configure API Gateway this way?** The JWT Authorizer verifies signatures against the User Pool public keys alongside `issuer` and `audience`, blocking forged or expired requests at the gateway (`401`) before Lambda runs or incurs charges (verified in tests E3 and E4 in Section 5.5). Restricting CORS to the CloudFront origin and throttling requests protects downstream compute and spend.
+
 ### 3.5. Connect All Components
 - Add a **CORS** rule on `imageguard-images-<ACCOUNT_ID>` permitting `PUT, GET` from your CloudFront domain.
 - Populate `config.js` with your Cognito domain, App Client ID, redirect URI, and API Gateway URL, re-upload it to S3, and run a CloudFront invalidation for `/*`.
 
-![Figure 3.4 – End-to-end result: user signs in, uploads images, and views APPROVED / REJECTED results](/fcj-workshop/images/5-workshop/26-4-web-gallery-v2.jpg)
-*Figure 3.4 – End-to-end result: user signs in, uploads images, and views APPROVED / REJECTED results*
+![Figure 3.4 – End result: statistics, multi-image upload, status filters, and label search](/fcj-workshop/images/5-workshop/26-5-web-dashboard-dark.jpg)
+*Figure 3.4 – End result: statistics, multi-image upload, status filters, and label search*
+
+![Figure 3.5 – Image detail modal: labels, upload/processed timestamps, Image ID](/fcj-workshop/images/5-workshop/26-7-web-detail-dark.jpg)
+*Figure 3.5 – Image detail modal: labels, upload/processed timestamps, Image ID*
+
+> **Client-side UI capabilities:** Status filtering, client-side label search, sorting, popular tags, summary statistics, detail modal, multi-file upload, JPEG magic-byte verification, and VI/EN language switching (`?lang=en`) all execute in the browser on the `GET /images` payload without modifying the backend architecture.
 
 ## Step 4 – Configure CloudWatch Observability
 
@@ -312,6 +323,8 @@ Run [`step4.sh`](https://github.com/NhutTan-May/fcj-workshop/blob/main/static/co
 | `imageguard-api-5xx` | `AWS/ApiGateway` → `5xx` | ≥ 5 |
 
 All alarms notify `imageguard-alerts` on both **ALARM** and **OK** state transitions. The `imageguard` CloudWatch Dashboard surfaces `APPROVED`/`REJECTED` counts, processing latency, Lambda errors, API 5xx counts, DLQ depth, and alarm states. Finally, enforce **14-day log retention** on all three Lambda log groups.
+
+> **Rationale for Alarms & 5 EMF Metrics:** Each alarm covers a distinct failure mode (Lambda errors, concurrency throttling, DLQ buildup, SNS notification failures tracked via `AlertPublishFailed`, and API 5xx spikes). Emitting `ImagesProcessed`, `ImagesApproved`, `ImagesRejected`, `ProcessingLatency`, and `AlertPublishFailed` via EMF JSON log lines avoids granting `cloudwatch:PutMetricData` or incurring extra API calls, while **OK** notifications confirm automatic recovery.
 
 ![Figure 4.1 – Seven alarms and dashboard provisioned via step4.sh](/fcj-workshop/images/5-workshop/28-1-step4-alarms-created.jpg)
 *Figure 4.1 – Seven alarms and dashboard provisioned via step4.sh*

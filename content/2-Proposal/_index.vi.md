@@ -21,6 +21,11 @@ pre: " <b> 2. </b> "
 
 Kết quả được lưu vào **Amazon DynamoDB** và hiển thị trên giao diện web chỉ sau vài giây. Toàn bộ hệ thống chạy theo kiến trúc **hướng sự kiện (event-driven)** và **serverless**: không có máy chủ nào phải quản lý, chỉ trả tiền theo lượt sử dụng.
 
+**Đối tượng sử dụng:**
+- **Người dùng cuối:** thành viên của các trang rao vặt, diễn đàn hoặc câu lạc bộ sinh viên cần đăng ảnh và quản lý danh sách ảnh cá nhân.
+- **Quản trị viên nền tảng:** người phụ trách kiểm duyệt nội dung, nhận email cảnh báo ngay khi có ảnh vi phạm.
+- **Đội ngũ vận hành:** theo dõi trạng thái xử lý và sức khỏe hệ thống qua CloudWatch Dashboard và Alarms.
+
 ## 2. Vấn đề cần giải quyết
 
 - Các nền tảng cho phép người dùng đăng ảnh (rao vặt, diễn đàn, nhóm cộng đồng) nhận rất nhiều ảnh mỗi ngày. **Duyệt tay** từng ảnh tốn nhân lực, chậm, và người duyệt phải tiếp xúc trực tiếp với nội dung độc hại.
@@ -219,3 +224,12 @@ Trong giai đoạn phát triển và demo (dự kiến < 300 ảnh), chi phí Re
 - Hệ thống giám sát gồm CloudWatch Dashboard, Alarms và email cảnh báo.
 - Tài liệu workshop song ngữ, có thể triển khai lại từ đầu, kèm phần Testing, Troubleshooting và Clean-up.
 - Nhóm nắm vững các kiến thức thực tế: kiến trúc event-driven serverless, IAM Least Privilege, dịch vụ AI của AWS, giám sát và tối ưu chi phí, cũng như cách xử lý khi một dịch vụ bị giới hạn quota.
+
+## 9. Hướng phát triển
+
+- **Nâng cao độ chính xác kiểm duyệt:** tách ngưỡng tin cậy theo từng danh mục (ví dụ hạ ngưỡng `Drugs & Tobacco` để tránh bỏ sót ảnh hút thuốc) và đánh giá lại trên tập 20–50 ảnh thử nghiệm.
+- **Quy trình quản trị viên duyệt lại:** đưa các ảnh `REJECTED` vào hàng chờ xác nhận thủ công nhằm giảm tác động của cảnh báo nhầm (ví dụ đồ chơi hình vũ khí).
+- **Mở rộng tính năng ứng dụng:** bổ sung tìm kiếm/lọc theo nhãn, hỗ trợ định dạng PNG và trang hiển thị cộng đồng cho các ảnh đã duyệt.
+- **Hạ tầng dưới dạng mã (IaC):** chuyển đổi các script CLI sang AWS SAM hoặc CloudFormation kết hợp CI/CD để triển khai tự động.
+- **Tăng cường bảo vệ lớp biên:** tích hợp AWS WAF vào CloudFront khi ứng dụng phục vụ lưu lượng người dùng thật.
+- **Tối ưu cho người dùng Việt Nam:** chuyển sang Region Singapore (`ap-southeast-1`) để giảm độ trễ và đáp ứng yêu cầu lưu trữ dữ liệu cá nhân.

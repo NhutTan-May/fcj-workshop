@@ -17,7 +17,7 @@ pre: " <b> 5.5. </b> "
 | **Untracked upload** | Put an object directly to S3 without a `PENDING` record | No DynamoDB item created and no alert email triggered |
 | **DLQ recovery path** | Misconfigure `TABLE_NAME` and invoke asynchronously | After 2 retries fail, SQS DLQ receives a `RetriesExhausted` payload (`approximateInvokeCount: 3`) |
 
-![Gallery: APPROVED and REJECTED images](/fcj-workshop/images/5-workshop/26-4-web-gallery-v2.jpg)
+![Gallery: APPROVED and REJECTED images](/fcj-workshop/images/5-workshop/26-6-web-library-dark.jpg)
 
 {{% notice note %}}
 **False-positive observation:** the wooden toy gun triggered *Violence/Weapons* at ~97% confidence. In production, false positives can be tuned by raising per-category `MIN_MODERATION_CONFIDENCE` thresholds or introducing a human review workflow for `REJECTED` items.
@@ -80,6 +80,21 @@ Both accuracy metrics were measured across **12 images** (2 initial sample photo
 ![HTTP to HTTPS redirect and expired presigned URL](/fcj-workshop/images/5-workshop/27-4-https-redirect-presigned-expired.jpg)
 
 Static assets are served from CloudFront's **SGN (Ho Chi Minh City)** edge location, keeping frontend load times fast for Vietnamese users despite the backend residing in `us-east-1`.
+
+## Error-Case Testing
+
+Executed [`error_test.sh`](/fcj-workshop/code/imageguard/scripts/error_test.sh) inside CloudShell on **28/11/2026**. Cases `E1`–`E3` invoke `imageguard-presign-upload` directly via `aws lambda invoke` with malformed inputs; `E4` fires 100 concurrent unauthenticated requests to the API; `E5` uploads a plain text file renamed to `.jpg`.
+
+| # | Scenario | Expected Result | Actual Outcome |
+|---|---|---|---|
+| `E1` | Request upload URL with `contentType: image/png` | Reject with `400` | ✅ `400` – *"Chi chap nhan image/jpeg"* (JPEG only) |
+| `E2` | Request body is invalid JSON | Reject with `400` | ✅ `400` – *"Body phai la JSON"* (body must be JSON) |
+| `E3` | Missing JWT (`sub` claim absent) | Reject with `401` | ✅ `401` – *"Unauthorized"* |
+| `E4` | 100 concurrent `GET /images` calls without token | Blocked at gateway, Lambda uninvoked | ✅ 100/100 rejected (`401`) at the JWT Authorizer with zero Lambda invocations or cost (route throttling 10 req/s, burst 20 was not reached in this unauthenticated test) |
+| `E5` | Plain text file renamed to `.jpg` | Does not stall in `PENDING` or crash Lambda | ✅ Item marked `REJECTED` with `INVALID_IMAGE:InvalidImageFormatException`; Lambda exited cleanly with zero DLQ messages |
+
+![Results of 5 error-case tests in CloudShell](/fcj-workshop/images/5-workshop/30-1-error-cases.jpg)
+*Figure: Output of `error_test.sh` – E1 and E2 return 400; E3 and E4 return 401; E5 marks the invalid file as REJECTED*
 
 ## Troubleshooting Log
 

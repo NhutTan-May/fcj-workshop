@@ -25,6 +25,16 @@ Bảng dự toán được lập bằng **AWS Pricing Calculator**: [xem chi ti�
 
 **Chi phí thực tế khi chạy workshop:** với dưới 300 ảnh thử nghiệm, chi phí Rekognition chỉ khoảng **0,30 – 0,60 USD**, toàn bộ các dịch vụ còn lại đều nằm gọn trong Free Tier.
 
+## Chi phí khi mở rộng quy mô (ước tính tuyến tính)
+
+| Sản lượng ảnh / tháng | Amazon Rekognition | Các dịch vụ còn lại | Tổng chi phí ước tính |
+|---|---|---|---|
+| 3.000 | 5,91 USD | 2,46 USD | **≈ 8,4 USD** |
+| 30.000 | 59,10 USD | ≈ 4,00 USD | **≈ 63 USD** |
+| 300.000 | 591,00 USD | ≈ 25,00 USD | **≈ 616 USD** |
+
+Ở mức 3.000 ảnh/tháng, Rekognition chiếm khoảng 70% tổng chi phí và vượt trên 90% khi lưu lượng tăng cao, trong khi chi phí CloudWatch gần như cố định. Do đó, đòn bẩy tối ưu hiệu quả nhất là **giảm số lần gọi Rekognition**: luôn kiểm duyệt trước rồi mới gắn nhãn (đã áp dụng) và tắt `DetectLabels` ở các luồng không cần gắn thẻ tự động. Khi vượt mốc 1 triệu ảnh/tháng, đơn giá Rekognition sẽ giảm theo bậc.
+
 ## Các biện pháp tối ưu chi phí đã áp dụng
 
 - **100% Serverless:** loại bỏ hoàn toàn EC2, NAT Gateway hay tài nguyên chạy thường trực 24/7.
